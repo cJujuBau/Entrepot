@@ -12,3 +12,7 @@ int convertToPWM(int value) {
     }
     return value;
 }
+
+float abs(float value){
+    return (value >= 0) ? value : -value;
+}

@@ -1,16 +1,6 @@
 #include "MotorController.h"
+#include "Robot.h"
 
-class Robot {
-public:
-    Robot(MotorController leftMotor, MotorController rightMotor);
-    void init();
-    void setSpeed(int linearSpeed, int rotationalSpeed);
-    void stop();
-
-private:
-    MotorController leftMotor;
-    MotorController rightMotor;
-};
 
 Robot::Robot(MotorController leftMotor, MotorController rightMotor)
     : leftMotor(leftMotor), rightMotor(rightMotor) {}
@@ -20,10 +10,10 @@ void Robot::init() {
     rightMotor.init();
 }
 
-void Robot::setSpeed(int linearSpeed, int rotationalSpeed){
-    leftMotor.setSpeed(speed);
+void Robot::setSpeed(float linearSpeed, float rotationalSpeed){
+    leftMotor.setSpeed(linearSpeed - length * rotationalSpeed);
+    rightMotor.setSpeed(linearSpeed + length * rotationalSpeed);
 }
-
 
 void Robot::stop() {
     leftMotor.stop();

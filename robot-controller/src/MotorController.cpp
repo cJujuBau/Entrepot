@@ -1,27 +1,8 @@
 #include "MotorController.h"
 #include "Utils.h"
-#include <wiringPi.h>
+#include "wiringPi.h"
 
-
-class MotorController {
-public:
-    MotorController(int BI1, int BI2, int PWMB, int base_direction);
-    void init();
-    void setSpeed(int speed);
-    void stop();
-    //int readSensor();
-    void setDirection(int directionToSet);
-
-private:
-    int motorSpeed;
-    int BI1; // BI1 pin number
-    int BI2; // BI2 pin number
-    int PWMB; // PWMB pin number
-    int base_direction; // rotation direction (1 for direct, -1 for inverse). Depends on the motor physical implementation
-    int direction;
-}; 
-
-MotorController::MotorController(int BI1, int BI2, int PWMB, int base_direction) : motorSpeed(0), BI1(BI1), BI2(BI2), PWMB(PWMB), base_direction(base_direction), direction(FORWARD) {}
+MotorController::MotorController(int BI1, int BI2, int PWMB, int base_direction) : motorSpeed(0), BI1(BI1), BI2(BI2), PWMB(PWMB), base_direction(base_direction) {}
 
 void MotorController::init() {
     // Initialization code for the motors
@@ -42,15 +23,18 @@ void MotorController::setDirection(int directionToSet){
         break;
     case BACKWARD:
         digitalWrite(BI1, LOW);
-        digitalWrite8(BI2, HIGH);
+        digitalWrite(BI2, HIGH);
     default:
         break;
     }
-    direction = directionToSet;
 }
 
-void MotorController::setSpeed(int speed) {
-    motorSpeed = speed;
+void MotorController::setSpeed(float speed) {
+    if (speed >= 0) setDirection(FORWARD);
+    else setDirection(BACKWARD);
+
+    motorSpeed = abs(speed);
+
     // Code to set the motor speed
     pwmWrite(PWMB, convertToPWM(motorSpeed));
 }

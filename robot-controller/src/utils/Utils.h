@@ -4,4 +4,7 @@
 // Function to convert a value to PWM
 int convertToPWM(int value);
 
+// Return the absolute value of a number
+float abs(float value);
+
 #endif // UTILS_H

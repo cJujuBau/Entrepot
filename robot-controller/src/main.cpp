@@ -1,25 +1,28 @@
 #include <iostream>
+#include "wiringPi.h"
 #include "MotorController.h"
+#include "Robot.h"
+
+#define PI 3.1415
 
 int main() {
-    MotorController motorControllerLeft(1, FORWARD);
-    MotorController motorControllerRight(1, BACKWARD);
+    MotorController motorControllerLeft(37, 36, 8, FORWARD);
+    MotorController motorControllerRight(34, 35, 12, BACKWARD);
 
+    Robot robot(motorControllerLeft, motorControllerRight);
 
-    motorControllerLeft.init();
-    motorControllerRight.init();
+    float speed = 100; // Example speed
+    float rotationalSpeed = PI/4;
 
-    int speed = 100; // Example speed
-    motorControllerLeft.setSpeed(speed);
-    motorControllerRight.setSpeed(speed);
-
-    // Control loop (simplified)
-    while (true) {
-        // Here you could add logic to read sensors and adjust motor speed
-        // For now, we'll just keep the motor running
-        std::cout << "Motor running at speed: " << speed << std::endl;
+    // Control loop
+    int i = 0;
+    while (i++ < 4) {
+        robot.setSpeed(speed, 0);
+        delay(3000);
+        robot.setSpeed(0, rotationalSpeed);
+        delay(2000);
     }
 
-    motorController.stop();
+    robot.stop();
     return 0;
 }
