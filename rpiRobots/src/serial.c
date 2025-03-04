@@ -1,4 +1,4 @@
-#include <utils.h>
+
 
 
 #include <stdio.h>
@@ -6,10 +6,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <termios.h>
+#include <serial.h>
 
 # define CRTSCTS 020000000000 /* Flow control.  */
 
@@ -39,6 +36,11 @@ void setSerialPort(int port){
     // Disable hardware flow control
     options.c_cflag &= ~CRTSCTS;
     options.c_iflag &= ~(IXON | IXOFF | IXANY);
+
+    // Configurer VMIN et VTIME pour un délai après le premier caractère
+    options.c_cc[VMIN] = 1;  // Ne pas attendre un nombre minimum de caractères
+    options.c_cc[VTIME] = 10; // Attendre jusqu'à 1 secondes après le premier caractère
+
     
     CHECK(tcsetattr(port, TCSANOW, &options), "msg: Unable to set serial port");
 }
@@ -66,11 +68,6 @@ void readSerial(int port, char* buffer, int size){
             perror("Erreur lecture port serie");
             break;
         }
-        else
-        {
-            // Aucune donnée reçue, attendre un peu avant de réessayer
-            usleep(100000); // Délai de 100 ms
-        }
     }
 
     // Terminer la chaîne de caractères
@@ -93,14 +90,3 @@ void closeSerialPort(int port){
     CHECK(close(port), "msg: Unable to close serial port");
 }
 
-int main(void)
-{
-    int port = openSerialPort("/dev/ttyS0");
-    setSerialPort(port);
-    writeSerial(port, "Hello World\n");
-    char buffer[100];
-    readSerial(port, buffer, 100);
-    closeSerialPort(port);    
-
-    return 0;
-}
