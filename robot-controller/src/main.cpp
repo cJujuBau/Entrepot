@@ -3,6 +3,8 @@
 #include "MotorController.h"
 #include "Robot.h"
 
+using namespace std;
+
 #define PI 3.1415
 
 int main() {
@@ -14,10 +16,13 @@ int main() {
     float speed = 100; // Example speed
     float rotationalSpeed = PI/4;
 
+    robot.init();
+
     // Control loop
     int i = 0;
     while (i++ < 4) {
         robot.setSpeed(speed, 0);
+
         delay(3000);
         robot.setSpeed(0, rotationalSpeed);
         delay(2000);
