@@ -1,15 +1,14 @@
 #include "MotorController.h"
 #include "Utils.h"
-#include "wiringPi.h"
+#include "Arduino.h"
 
 MotorController::MotorController(int BI1, int BI2, int PWMB, int base_direction) : motorSpeed(0), BI1(BI1), BI2(BI2), PWMB(PWMB), base_direction(base_direction) {}
 
 void MotorController::init() {
     // Initialization code for the motors
-    wiringPiSetup();
     pinMode(BI1, OUTPUT);
     pinMode(BI2, OUTPUT);
-    pinMode(PWMB, PWM_OUTPUT);
+    pinMode(PWMB, OUTPUT);
 }
 
 void MotorController::setDirection(int directionToSet){
@@ -36,7 +35,7 @@ void MotorController::setSpeed(float speed) {
     motorSpeed = abs(speed);
 
     // Code to set the motor speed
-    pwmWrite(PWMB, convertToPWM(motorSpeed));
+    analogWrite(PWMB, convertToPWM(motorSpeed));
 }
 
 void MotorController::stop() {
@@ -46,7 +45,6 @@ void MotorController::stop() {
 // // Function to read sensor data
 // int MotorController::readSensor() {
 //     // Setup wiringPi and set the pin mode
-//     wiringPiSetup();
 //     int pin = 0; // GPIO pin number (wiringPi pin number)
 //     pinMode(pin, INPUT);
 
