@@ -36,9 +36,10 @@
 /* ------------------------------------------------------------------------ */
 /*            P R O T O T Y P E S    D E    F O N C T I O N S               */
 /* ------------------------------------------------------------------------ */
-
+int openSerialPort(const char* portStr);
 void setSerialPort(int port);
-void writeSerial(int port, const char* data);
+void writeSerial(int port, const char* data, const int size);
+void readSerial(int port, char* buffer, int size);
 void closeSerialPort(int port);
 
 #endif

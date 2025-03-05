@@ -1,0 +1,2 @@
+- [ ] Serveur pouvoir avoir plusieurs connextions uen par thread je pense
+- [ ] Thread pour lire le port serie arduino 

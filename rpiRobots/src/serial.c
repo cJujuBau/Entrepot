@@ -45,8 +45,12 @@ void setSerialPort(int port){
     CHECK(tcsetattr(port, TCSANOW, &options), "msg: Unable to set serial port");
 }
 
-void writeSerial(int port, const char* data){
-    CHECK(write(port, data, strlen(data)), "msg: Write to serial failed!");
+void writeSerial(int port, const char* data, const int size){
+    int new_size = size + 2;
+    char buffer[new_size];
+    sprintf(buffer, "%s\r\n", data);
+
+    CHECK(write(port, buffer, new_size), "writeSerial: Write to serial failed!");
 }
 
 void readSerial(int port, char* buffer, int size){
@@ -60,7 +64,7 @@ void readSerial(int port, char* buffer, int size){
             buffer[index++] = single_char;
             DEBUG_PRINT("Caractere recu : %c\n", single_char); 
 
-            if (single_char == '\n' || index >= size - 1) break;
+            if (single_char == '\n' || index > size) break;
 
         }
         else if (reception == -1)
@@ -74,14 +78,8 @@ void readSerial(int port, char* buffer, int size){
     buffer[index] = '\0';
 
     // Afficher le message reçu
-    if (index > 0)
-    {
-        printf("Message reçu : %s\n", buffer);
-    }
-    else
-    {
-        printf("Aucune donnee recue.\n");
-    }
+    if (index > 0) DEBUG_PRINT("Message reçu : %s\n", buffer);
+    else printf("Aucune donnee recue.\n");
 
     DEBUG_PRINT("Reception finie.\n");
 }
@@ -90,3 +88,24 @@ void closeSerialPort(int port){
     CHECK(close(port), "msg: Unable to close serial port");
 }
 
+
+/*
+
+Exemple d'utilisation :
+
+int main(int argc, char const *argv[])
+{
+    int port = openSerialPort(PORT_ARDUINO);
+    setSerialPort(port);
+    writeSerial(port, "Hello World\n");
+    char buffer[100];
+    readSerial(port, buffer, 100);
+    closeSerialPort(port);  
+
+    
+
+    return 0;
+}
+
+
+*/
