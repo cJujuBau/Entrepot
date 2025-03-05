@@ -3,9 +3,11 @@
 
 #include <serial.h>
 
+#define PORT_ARDUINO "/dev/ttyS0"
+
 int main(int argc, char const *argv[])
 {
-    int port = openSerialPort("/dev/ttyS0");
+    int port = openSerialPort(PORT_ARDUINO);
     setSerialPort(port);
     writeSerial(port, "Hello World\n");
     char buffer[100];

@@ -18,6 +18,9 @@ bin/serialDEBUG: src/serial.c
 bin/serial: src/serial.c
 	gcc $(CFLAGS) $^ -o $@ $(LIBS)
 
+bin/marvelmindClient: src/marvelmind.c  src/marvelmindClient.c 
+	gcc $(CFLAGS) $^ -o $@ $(LIBS)
+
 
 ###########################
 #		 CLEAN			  #
