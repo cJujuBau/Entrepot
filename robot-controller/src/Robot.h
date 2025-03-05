@@ -2,13 +2,18 @@
 
 class Robot {
 public:
-    Robot(MotorController leftMotor, MotorController rightMotor, float length);
-    void init();
-    void setSpeed(float linearSpeed, float rotationalSpeed);
-    void stop();
+    Robot(Point pos, Motor motorLeft, Motor motorRight, MotorController motorControllerLeft, MotorController motorControllerRight, InverseMotorModel InverseMotorModel, double theta);
+    void updateState();
+    void readMarvelmind();
+    double getTheta();
 
 private:
-    MotorController leftMotor;
-    MotorController rightMotor;
-    float length;
+    Point pos;
+    Motor motorLeft;
+    Motor motorRight;
+    MotorController motorControllerLeft;
+    MotorController motorControllerRight;
+    InverseMotorModel inverseMotorModel;
+    double theta;
+    double v, w;
 };

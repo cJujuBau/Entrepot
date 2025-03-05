@@ -2,9 +2,18 @@
 #include "utils/Utils.h"
 #include "Arduino.h"
 
-MotorController::MotorController(int BI1, int BI2, int PWMB, int VA, int VB, int base_direction) : motorSpeed(0), BI1(BI1), BI2(BI2), PWMB(PWMB), base_direction(base_direction) {}
+Motor* Motor::instance = nullptr;
 
-void MotorController::init() {
+Motor::Motor(int BI1, int BI2, int PWMB, int VA, int VB, int sens) : motorSpeed(0), BI1(BI1), BI2(BI2), PWMB(PWMB), sens(sens) {
+    this->pulse = 0;
+    this->pulsePrec = 0;
+    this->tempsPrec = 0;
+    this->u = 0;
+    this->v = 0;
+    instance = this;
+}
+
+void Motor::init() {
     // Initialization code for the motors
     pinMode(this->VA, INPUT_PULLUP);
     pinMode(this->VB, INPUT_PULLUP);
@@ -12,51 +21,67 @@ void MotorController::init() {
     pinMode(this->BI1, OUTPUT);
     pinMode(this->BI2, OUTPUT);
     pinMode(this->PWMB, OUTPUT);
+
+    attachInterrupt(digitalPinToInterrupt(this->VA), onRisingEdge, RISING);
 }
 
-void MotorController::setDirection(int directionToSet){
-    directionToSet *= base_direction; // Inverse la direction si le moteur est monté à l'envers
+float Motor::getSpeed() {
+    updateSpeed();
+    return v;
+}
 
-    switch (directionToSet)
-    {
-    case FORWARD:
-        digitalWrite(BI2, LOW);
-        digitalWrite(BI1, HIGH);
-        direction = directionToSet;
-        break;
-    case BACKWARD:
-        digitalWrite(BI1, LOW);
-        digitalWrite(BI2, HIGH);
-        direction = directionToSet;
-    default:
-        break;
+void Motor::updateSpeed(){
+  long tps = millis();
+  long dpulse = (pulse - pulsePrec);
+  double dt = (tps - tempsPrec);
+  double vit = WHEEL_RADIUS * dpulse * 2 * PI;
+  vit = vit / (dt * MS_TO_S);
+  vit = vit / (PULSE_PER_TURN * REDUCTION_RATE);
+
+  pulsePrec = pulse;
+  tempsPrec = tps;
+  v = vit * sens;
+}
+
+void Motor::onRisingEdge(){
+    if (instance) {
+        instance->handleRisingEdge();
     }
 }
 
-void MotorController::setSpeed(float speed) {
-    if (speed >= 0) setDirection(FORWARD);
-    else setDirection(BACKWARD);
-
-    motorSpeed = abs(speed);
-
-    // Code to set the motor speed
-    Serial.print("Direction: " + String(direction) + "; ");
-    Serial.print("Speed: " + String(motorSpeed));
-    Serial.println();
-    analogWrite(PWMB, convertToPWM(motorSpeed));
+void Motor::handleRisingEdge() {
+  if (digitalRead(VB)) {
+    pulse++;
+  } else {
+    pulse--;
+  }
 }
 
-void MotorController::stop() {
-    setSpeed(0);
+void Motor::setVoltage(const float voltage) {
+    u = voltage * sens;
 }
 
-// // Function to read sensor data
-// int MotorController::readSensor() {
-//     // Setup wiringPi and set the pin mode
-//     int pin = 0; // GPIO pin number (wiringPi pin number)
-//     pinMode(pin, INPUT);
+void Motor::applyVoltage(){
+    float voltage = u;
 
-//     // Read the value from the pin
-//     int value = digitalRead(pin);
-//     return value;
-// }
+    if (abs(voltage) < 1) { voltage = 0; }
+    if (voltage > 0) {
+        digitalWrite(BI2, LOW);
+        digitalWrite(BI1, HIGH);
+    } else {
+        digitalWrite(BI1, LOW);
+        digitalWrite(BI2, HIGH);
+    }
+
+    analogWrite(PWMB, convertToPWM(abs(voltage)));
+}
+
+MotorController::MotorController(double Km, double Ki, double ref) : Km(Km), Ki(Ki), ref(ref) {}
+
+void MotorController::setReference(double ref) {
+    this->ref = ref;
+}
+
+void MotorController::updateOutput(Motor &motor) {
+    motor.setVoltage(this->ref / Km); // pas encore d'intégrateur implémenté
+}

@@ -5,10 +5,10 @@ int convertToPWM(int value) {
     // Ensure the value is within the PWM range
     if (value < 0) {
         return 0;
-    } else if (value > 255) {
-        return 255;
+    } else if (value > PWM_MAX) {
+        return PWM_MAX;
     }
-    return value;
+    return value * V2PWM;
 }
 
 float abs(float value){
