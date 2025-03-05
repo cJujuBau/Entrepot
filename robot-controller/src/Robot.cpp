@@ -2,8 +2,8 @@
 #include "Robot.h"
 
 
-Robot::Robot(MotorController leftMotor, MotorController rightMotor)
-    : leftMotor(leftMotor), rightMotor(rightMotor) {}
+Robot::Robot(MotorController leftMotor, MotorController rightMotor, float length)
+    : leftMotor(leftMotor), rightMotor(rightMotor), length(length) {}
 
 void Robot::init() {
     leftMotor.init();

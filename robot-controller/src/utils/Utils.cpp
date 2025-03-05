@@ -1,6 +1,4 @@
 #include "Utils.h"
-#include <wiringPi.h>
-
 
 // Function to convert a value to PWM
 int convertToPWM(int value) {

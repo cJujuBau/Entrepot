@@ -2,7 +2,7 @@
 
 class Robot {
 public:
-    Robot(MotorController leftMotor, MotorController rightMotor);
+    Robot(MotorController leftMotor, MotorController rightMotor, float length);
     void init();
     void setSpeed(float linearSpeed, float rotationalSpeed);
     void stop();
