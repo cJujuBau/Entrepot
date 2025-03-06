@@ -9,12 +9,14 @@
 #define NOMBRE_ROBOTS 3
 #define NOMBRE_SECTIONS_PRINCIPALES 2*NOMBRE_ALLEES + 7 + NOMBRE_ROBOTS
 #define LARGEUR_ALLEE 50
-#define VITESSE_ROBOT 0.1
+#define VITESSE_ROBOT 0.2
 
 sfVideoMode mode = {2000, 1000, 32};
 sfRenderWindow *window;
 sfRectangleShape *etagere[NOMBRE_ETAGERES];
 sfRectangleShape *bac[2]; // 2 bacs : parametre non scalable
+
+int compteur;
 
 typedef struct section_cycle_principal
 {
@@ -26,6 +28,8 @@ typedef struct robot
 {
     sfVector2f* pos;
     sfCircleShape* cercle; 
+    int numero_section; // numero de la section courante dans laquelle le robot se situe ( cycle princpal ou non )
+    int numero_wayPoint; // numero du point intermédiaire dans la section ( demarrage à 0 ). Si le robot fait a ---> b, entre a et b il possède le wayPoint a en mémoire
 }robot;
 
 section_cycle_principal* s_principale[NOMBRE_SECTIONS_PRINCIPALES]; // liste des sections principales
@@ -46,7 +50,7 @@ section_cycle_principal *creer_section(int nombre_points, int* points) {
     if (section) {
         for(int i=0; i<nombre_points; i++)
         {
-            section->point_section[i] = (sfVector2f){points[2*i],points[2*i]+1};
+            section->point_section[i] = (sfVector2f){points[2*i],points[2*i+1]};
         }
     }
     return section;
@@ -65,14 +69,25 @@ void creer_robot(robot** r) {
         free(*r);
         exit(EXIT_FAILURE);
     }
+    rbt->cercle = sfCircleShape_create();
+    rbt->numero_section = 0; // section initiale du robot, fixe pour le moment
+    rbt->numero_wayPoint = 0; // wayPoint initial
+    sfCircleShape_setRadius(rbt->cercle, 25); // rayon fixe pour le moment
+    sfCircleShape_setFillColor(rbt->cercle,sfRed);
 }
 
 // fonction qui actualise la position du robot dans la structure et pour l'affichage
-void actualisepositionRobot(robot* rbt, sfVector2f nouvellePosition)
+void actualisePositionRobot(robot* rbt, sfVector2f nouvellePosition)
 {
     (rbt->pos)->x = nouvellePosition.x;
     (rbt->pos)->y = nouvellePosition.y;
     sfCircleShape_setPosition(rbt->cercle,nouvellePosition);
+}
+
+void actualiseSectionWayPointRobot(robot* rbt, int n_section, int n_wayPoint)
+{
+    rbt->numero_section = n_section;
+    rbt->numero_wayPoint = n_wayPoint;
 }
 
 void setupEnvironment() {
@@ -116,26 +131,36 @@ void setupEnvironment() {
 
     // dessin d'un robot pour le moment (a adapter quand on augmente le nombre de robots)
     creer_robot(&rbt);
-    rbt->cercle = sfCircleShape_create();
-    sfCircleShape_setRadius(rbt->cercle, 25); // rayon fixe pour le moment
-    sfCircleShape_setFillColor(rbt->cercle,sfRed);
-    sfVector2f pos = {300,450};
-    actualisepositionRobot(rbt,pos);
-    sfCircleShape_setPosition(rbt->cercle,*(rbt->pos));
+    //sfVector2f pos = {300,450};
+    sfVector2f pos = s_principale[0]->point_section[0];
+    actualisePositionRobot(rbt,pos);
 }
 
 void creer_cycle_principal()
 {
     int pos[2];
-    pos[0] = 300;
-    pos[1] = 30;
+    pos[0] = 400;
+    pos[1] = 450;
     s_principale[0] = creer_section(1,pos); // je créer la section 0 du cycle principal
-    int pos2[4];
-    pos2[0] = 400;
-    pos2[1] = 30;
-    pos2[2] = 400;
-    pos2[3] = 80;
-    s_principale[1] = creer_section(2,pos2);
+    int pos2[2];
+    pos2[0] = 500;
+    pos2[1] = 450;
+    s_principale[1] = creer_section(1,pos2);
+    //printf("Section 1 à la création : (%f,%f) \n", s_principale[1]->point_section->x, s_principale[1]->point_section->y);
+    int pos3[4];
+    pos3[0] = 600;
+    pos3[1] = 450;
+    pos3[2] = 600;
+    pos3[3] = 600;
+    s_principale[2] = creer_section(2,pos3);
+    int pos4[6];
+    pos4[0] = 600;
+    pos4[1] = 500;
+    pos4[2] = 700;
+    pos4[3] = 500;
+    pos4[4] = 600;
+    pos4[5] = 600;
+    s_principale[3] = creer_section(3,pos4);
 }
 
 void processEvents()
@@ -175,27 +200,66 @@ float distance(sfVector2f posA, sfVector2f posB)
 }
 
 // fonction qui fait avancer le robot vers son point final
-void Deplacement_elementaire(robot* rbt, sfVector2f posfinale)
+int Deplacement_elementaire(robot* rbt, sfVector2f posfinale)
 {
     sfVector2f posRobot = *(rbt->pos);
     float d = distance(posRobot,posfinale);
     if(d > 5) // critère de tolérance pour considérer que le robot est bien à la position finale
     {
-        printf("Valeur x de posfinale : %f | valeur x de posRobot : %f | ratio : %f \n", posfinale.x, posRobot.x, (posfinale.x - posRobot.x)/d);
+        //printf("Valeur x de posfinale : %f | valeur x de posRobot : %f | ratio : %f \n", posfinale.x, posRobot.x, (posfinale.x - posRobot.x)/d);
         sfVector2f nouvellePosition = {(rbt->pos)->x + VITESSE_ROBOT * ((posfinale.x - posRobot.x)/d), (rbt->pos)->y + VITESSE_ROBOT * ((posfinale.y - posRobot.y)/d)}; 
+        if(compteur  % 100 == 0)
         printf("Nouvelle position du robot : (%f,%f) \n", nouvellePosition.x, nouvellePosition.y);
-        actualisepositionRobot(rbt,nouvellePosition);
+        actualisePositionRobot(rbt,nouvellePosition);
+        return 1;
     }
+    return 0; // on est arrivé à destination
 }
 
 void testAvancer()
 {
-    // sfVector2f pos = {((rbt->pos)->x)+1,((rbt->pos)->y)+1};
-    sfVector2f pos = {400,450};
+    //sfVector2f pos = {((rbt->pos)->x)+1,((rbt->pos)->y)+1};
+    sfVector2f pos = {0,0};
+    //sfVector2f pos = *(s_principale[0]->point_section);
     Deplacement_elementaire(rbt,pos);
-    printf("Position du robot : (%f,%f) \n", (rbt->pos)->x, (rbt->pos)->y);
+    //printf("Position du robot : (%f,%f) \n", (rbt->pos)->x, (rbt->pos)->y);
 }
 
+// fonction qui amène le robot au dernier point de la section passé en argument
+int testDeplacement(int numero_section_objectif)
+{
+    // printf("Section 1 : (%f,%f) \n", s_principale[1]->point_section->x, s_principale[1]->point_section->x);
+    // pour l'instant on ne traite pas le passage à 0
+    int resultat_deplacement;
+    int indice_prochaine_section;
+    int indice_prochain_wayPoint;
+    
+    if(rbt->numero_wayPoint < (s_principale[(rbt->numero_section)]->nombre_points)-1) // si on n'est pas au dernier wayPoint de sa section ( section à + d'1 wayPoint )
+    {
+        indice_prochaine_section = rbt->numero_section ; // on reste dans la même section
+        indice_prochain_wayPoint = rbt->numero_wayPoint + 1; // on veut progresser dans la section courante
+    }
+    else // on est au dernier wayPoint de sa section
+    {
+        if(rbt->numero_section == numero_section_objectif) // on est a la section objectif
+        {
+            return 0; // on est arrivé à destination
+        }
+        else // on doit se déplacer à la prochaine section
+        {
+            indice_prochaine_section = (rbt->numero_section) + 1; // on doit se rendre à la section qui suit, ATTENTION : passage à 0 non traité encore
+            indice_prochain_wayPoint = 0; // on doit se rendre au premier wayPoint de la section qui suit
+        }
+    }
+
+    resultat_deplacement = Deplacement_elementaire(rbt,s_principale[indice_prochaine_section]->point_section[indice_prochain_wayPoint]);
+    if(resultat_deplacement == 0) // si on est arrivé au point intermediaire
+    {
+        actualiseSectionWayPointRobot(rbt,indice_prochaine_section,indice_prochain_wayPoint);
+    }
+    return 1;
+
+}
 
 void clean()
 {
@@ -213,9 +277,12 @@ void clean()
 
 int main() 
 {
-    setupEnvironment();
 
-    creer_cycle_principal();
+    creer_cycle_principal();    
+
+    printf("Coordonnées des 2 points de la section 2 : (%f,%f) et (%f,%f) \n", s_principale[2]->point_section[0].x, s_principale[2]->point_section[0].y, s_principale[2]->point_section[1].x,s_principale[2]->point_section[1].y);
+
+    setupEnvironment();
 
     if (!window) return 1; // Vérification si la fenêtre a bien été créée
 
@@ -223,8 +290,13 @@ int main()
     {
         processEvents();
         render();
-        testAvancer();
+        //testAvancer();
+        if(testDeplacement(3) == 0)
+        {
+            //printf("On est arrivé ! \n");
+        }
         sleep(0.5);
+        compteur++;
     }
     clean();
     return 0;
