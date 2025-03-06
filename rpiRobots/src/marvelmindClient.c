@@ -7,11 +7,18 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <signal.h>
+#include <string.h>
 
+#include <utils.h>
+#include <reseauClient.h>
+#include <serial.h>
+#include <main.h>
 
 struct timespec tsMM;
+int addressMM = 0;
 
-
+RobotMarvelmind robotMarvelmind = NULL;
+int getPostionOn = 1;
 
 bool terminateProgram=false;
 
@@ -34,6 +41,8 @@ void initRobotMarvelmind(RobotMarvelmind robotMarvelmind, const char* ttyFileNam
     CHECK_NULL(semMM = sem_open(DATA_INPUT_SEMAPHORE, O_CREAT, 0777, 0), "initRobotMarvelmind: sem_open(DATA_INPUT_SEMAPHORE)");
 
     robotMarvelmind->address = address;
+
+    #ifndef PC
     robotMarvelmind->hedge = createMarvelmindHedge();
     CHECK_NULL(robotMarvelmind->hedge, "Error: Unable to create MarvelmindHedge");
 
@@ -47,11 +56,15 @@ void initRobotMarvelmind(RobotMarvelmind robotMarvelmind, const char* ttyFileNam
         puts("marvelmindClient.c : Error-Unable to start MarvelmindHedge");
         exit(EXIT_FAILURE);
     }
+    #endif
 }
 
 void destroyRobotMarvelmind(RobotMarvelmind robotMarvelmind){
+    #ifndef PC
     stopMarvelmindHedge(robotMarvelmind->hedge);
     destroyMarvelmindHedge(robotMarvelmind->hedge);
+    #endif
+
     free(robotMarvelmind);
 
     sem_close(semMM);
@@ -77,6 +90,91 @@ void getPositionMarvelmind(RobotMarvelmind robotMarvelmind, Position position){
         }
     }
 }
+
+
+
+
+void *threadGetAndSendPositionMarvelmind(void *arg){
+    Position positionTemp = malloc(sizeof(struct Position));
+
+    while (getPostionOn)
+    {
+        #ifdef PC
+            positionTemp->x = 1000 + rand() % 1000;
+            positionTemp->y = 1000 + rand() % 1000;
+        #else
+        if (!robotMarvelmind->hedge->terminationRequired){
+
+            if (clock_gettime(0, &tsMM) == -1)
+            {       
+                printf("clock_gettime error");
+                exit(EXIT_FAILURE);
+            }
+
+            tsMM.tv_sec += 2; // Voir si on peut pas virer ca 
+            sem_timedwait(semMM,&tsMM);
+            getPositionMarvelmind(robotMarvelmind, positionTemp);
+            
+        } 
+        else getPostionOn = 0;
+        #endif 
+        
+        DEBUG_PRINT("threadGetAndSendPositionMarvelmind: x=%d, y=%d\n", positionTemp->x, positionTemp->y);
+        
+        
+        char buffer[20];
+        int size = -1;
+        sprintf(buffer, "p:%d,%d;", positionTemp->x, positionTemp->y);
+        size = strlen(buffer);
+        DEBUG_PRINT("threadGetAndSendPositionMarvelmind: sentBuffer=%s\n", buffer);
+        
+
+        #ifdef PI
+        pthread_mutex_lock(&mutexSerialPort);
+        writeSerial(portArduino, buffer, size);
+        pthread_mutex_unlock(&mutexSerialPort);
+
+        #endif
+        
+        // Ecriture reseau
+        CHECK(sendToServer(sd, id, buffer, size), "threadGetAndSendPositionMarvelmind: sendToServer failed");
+        
+        
+        #ifdef PC
+        sleep(1); // Pas surd eca
+        #endif
+    }
+
+    DEBUG_PRINT("threadGetAndSendPositionMarvelmind: End of thread\n");
+    free(positionTemp);
+    
+    return NULL;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#ifdef TEST_MM
 
 // A supprimer comme fonction
 void printPositionMarvelmindRobot(RobotMarvelmind robotMarvelmind){
@@ -104,7 +202,6 @@ void printPositionMarvelmindRobot(RobotMarvelmind robotMarvelmind){
 }
 
 
-#ifdef TEST_MM
 
 #define PORT_MARVELMIND "/dev/ttyACM0"
 #define ADDRESS_MM      12

@@ -9,6 +9,11 @@
 #include <serial.h>
 
 # define CRTSCTS 020000000000 /* Flow control.  */
+#include <serial.h>
+
+int portArduino = -1;                      // Définition unique
+pthread_mutex_t mutexSerialPort = PTHREAD_MUTEX_INITIALIZER;
+int receptionSerieEnCours = 1;
 
 
 int openSerialPort(const char* portStr) {
@@ -56,13 +61,14 @@ void writeSerial(int port, const char* data, const int size){
 void readSerial(int port, char* buffer, int size){
     char single_char;
     int index = 0;
+    int reception = 0;
     while (1)
     {
-        int reception = read(port, &single_char, 1); // Lire 1 caractère
+        reception = read(port, &single_char, 1); // Lire 1 caractère
         if (reception > 0)
         {
             buffer[index++] = single_char;
-            DEBUG_PRINT("Caractere recu : %c\n", single_char); 
+            // DEBUG_PRINT("Caractere recu : %c et %d\n", single_char, single_char); 
 
             if (single_char == '\n' || index > size) break;
 
@@ -78,28 +84,43 @@ void readSerial(int port, char* buffer, int size){
     buffer[index] = '\0';
 
     // Afficher le message reçu
-    if (index > 0) DEBUG_PRINT("Message reçu : %s\n", buffer);
-    else printf("Aucune donnee recue.\n");
+    // if (index > 0) DEBUG_PRINT("Message reçu : %s\n", buffer);
+    // else printf("Aucune donnee recue.\n");
 
-    DEBUG_PRINT("Reception finie.\n");
+    // DEBUG_PRINT("Reception finie.\n");
 }
+void *threadReceptionSerie(void *arg){
+    char buffer[100];
+    while (receptionSerieEnCours)
+    {
+        readSerial(portArduino, buffer, 100); // Voir si ca ne bloque pas le port serie et mettre la mutex
+        DEBUG_PRINT("threadReceptionSerie: buffer=%s\n", buffer);
+    }
+
+    return NULL;
+}
+
 
 void closeSerialPort(int port){
     CHECK(close(port), "msg: Unable to close serial port");
 }
 
 
-/*
 
-Exemple d'utilisation :
+
+#ifdef TEST_SERIAL
+
+
+// Exemple d'utilisation :
+#define PORT_ARDUINO "/dev/ttyS0"
 
 int main(int argc, char const *argv[])
 {
     int port = openSerialPort(PORT_ARDUINO);
     setSerialPort(port);
-    writeSerial(port, "Hello World\n");
-    char buffer[100];
-    readSerial(port, buffer, 100);
+    writeSerial(port, "r:10,100,25;\r\n", 16);
+    // char buffer[100];
+    // readSerial(port, buffer, 100);
     closeSerialPort(port);  
 
     
@@ -107,5 +128,4 @@ int main(int argc, char const *argv[])
     return 0;
 }
 
-
-*/
+#endif

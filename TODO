@@ -1,2 +1,3 @@
 - [ ] Serveur pouvoir avoir plusieurs connextions uen par thread je pense
 - [ ] Thread pour lire le port serie arduino 
+- [ ] Gerer si on recoit qqch sur le port serie comme la detection d'un objet

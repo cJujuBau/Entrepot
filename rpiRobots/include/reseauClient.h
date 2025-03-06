@@ -40,6 +40,16 @@ void initReseauClient(int *sd, const char *ipServeur);
 int sendToServer(int sd, const int id, const char *msg, const int size);
 int closeReseauClient(int sd);
 
+void *threadReceptionReseau(void *arg);
+
+
+/* ------------------------------------------------------------------------ */
+/*                 V A R I A B L E S    G L O B A L E S                     */
+/* ------------------------------------------------------------------------ */
+
+extern int sd;
+extern int receptionReseauEnCours;
+
 
 #endif
 

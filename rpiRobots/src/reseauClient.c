@@ -6,6 +6,9 @@
 
 #include <reseauClient.h>
 
+int sd =-1;
+int receptionReseauEnCours = 1;
+
 void initReseauClient(int *sd, const char *ipServeur){
     
     struct sockaddr_in addrServ;
@@ -43,7 +46,23 @@ int closeReseauClient(int sd){
 }
 
 
+void *threadReceptionReseau(void *arg){
+    char buffer[100];
+    int nbChar;
+    while (receptionReseauEnCours)
+    {
+        nbChar = recv(sd, buffer, 100, 0);
+        if (nbChar > 0)
+        {
+            buffer[nbChar] = '\0';
+            DEBUG_PRINT("threadReceptionReseau: buffer=%s\n", buffer);
+        }
+    }
 
+    DEBUG_PRINT("threadReceptionReseau: End of thread\n");
+
+    return NULL;
+}
 
 
 /* 

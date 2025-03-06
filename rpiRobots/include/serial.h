@@ -19,6 +19,8 @@
 #include <fcntl.h>
 #include <termios.h>
 
+#include <pthread.h>
+
 /* ------------------------------------------------------------------------ */
 /*              C O N S T A N T E S     S Y M B O L I Q U E S               */
 /* ------------------------------------------------------------------------ */
@@ -41,5 +43,18 @@ void setSerialPort(int port);
 void writeSerial(int port, const char* data, const int size);
 void readSerial(int port, char* buffer, int size);
 void closeSerialPort(int port);
+
+void *threadReceptionSerie(void *arg);
+/* ------------------------------------------------------------------------ */
+/*                 V A R I A B L E S    G L O B A L E S                     */
+/* ------------------------------------------------------------------------ */
+
+// int portArduino =-1;
+// pthread_mutex_t mutexSerialPort = PTHREAD_MUTEX_INITIALIZER;
+// int receptionSerieEnCours = 1;
+
+extern int portArduino;
+extern pthread_mutex_t mutexSerialPort;
+extern int receptionSerieEnCours;
 
 #endif

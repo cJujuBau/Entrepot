@@ -10,7 +10,10 @@ ifeq ($(PC), 1)
 	CFLAGS +=-DDEBUG
 endif
 
+# Pour test sur pi sans le marvelmind
 ifeq ($(PI), 1)
+	CFLAGS +=-DPI
+	CFLAGS +=-DPC
 	CFLAGS +=-DDEBUG
 endif
 
@@ -21,7 +24,7 @@ all: bin/main
 ###########################
 
 bin/main: bin/main.o bin/serial.o bin/marvelmind.o bin/marvelmindClient.o bin/reseauClient.o
-	gcc -g $(CFLAGS) $^ -o $@ $(LIBS)
+	gcc -g $(CFLAGS) $^ -o $@ $(LIBS) -ljansson
 
 bin/serial.o: src/serial.c
 	gcc -g $(CFLAGS) -c $^ -o $@ $(LIBS)
@@ -36,7 +39,7 @@ bin/reseauClient.o: src/reseauClient.c
 	gcc -g $(CFLAGS) -c $^ -o $@ $(LIBS)
 
 bin/main.o: src/main.c
-	gcc -g $(CFLAGS) -c $^ -o $@ $(LIBS)
+	gcc -g $(CFLAGS) -c $^ -o $@ $(LIBS) -ljansson
 
 ###########################
 #		   SERIAL		  #
@@ -44,7 +47,7 @@ bin/main.o: src/main.c
 
 
 bin/serialDEBUG: src/serial.c
-	gcc $(CFLAGS) $(CSTFLAGS) $^ -o $@ $(LIBS)
+	gcc $(CFLAGS) $(CSTFLAGS) -DTEST_SERIAL $^ -o $@ $(LIBS)
 
 bin/serial: src/serial.c
 	gcc $(CFLAGS) $^ -o $@ $(LIBS)
