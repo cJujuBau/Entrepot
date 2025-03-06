@@ -5,7 +5,7 @@ LOCAL_SRC_DIR="./src"
 LOCAL_INCLUDE_DIR="./include"
 LOCAL_MAKEFILE="./makefile"
 REMOTE_USER="pi"
-REMOTE_HOST="192.168.1.22"  # Remplacez par l'adresse IP de votre Raspberry Pi
+REMOTE_HOST="172.20.10.2" #"192.168.1.22"  # Remplacez par l'adresse IP de votre Raspberry Pi
 REMOTE_DIR="/home/pi/entrepot"
 
 # Copier le Makefile

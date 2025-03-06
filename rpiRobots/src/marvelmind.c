@@ -183,6 +183,8 @@ int OpenSerialPort_ (const char * portFileName, uint32_t baudrate, bool verbose)
         if (verbose)
             puts ("Error: unable to open serial connection "
                   "(possibly serial port is not available)");
+
+        
         return -1;
     }
     struct termios ttyCtrl;
@@ -706,7 +708,11 @@ Marvelmind_Thread_ (void* param)
 
     SERIAL_PORT_HANDLE ttyHandle=OpenSerialPort_(hedge->ttyFileName,
                                  hedge->baudRate, hedge->verbose);
-    if (ttyHandle==PORT_NOT_OPENED) hedge->terminationRequired=true;
+    if (ttyHandle==PORT_NOT_OPENED) {
+        hedge->terminationRequired=true;
+        puts ("Marvelmind_Thread_: Error-unable to open serial port");
+        exit(EXIT_FAILURE);
+    }
     else if (hedge->verbose) printf ("Opened serial port %s with baudrate %u\n",
                                          hedge->ttyFileName, hedge->baudRate);
 

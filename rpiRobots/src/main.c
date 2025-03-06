@@ -1,9 +1,8 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<unistd.h>
-#include<string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 #include <sys/types.h>
-
 
 #include <serial.h>
 #include <main.h>
@@ -12,12 +11,17 @@
 
 #define PORT_ARDUINO    "/dev/ttyS0"
 #define PORT_MARVELMIND "/dev/ttyACM0"
-#define ADDRESS_MM      11
+#define ADDRESS_MM      12
 #define ID              1
+#ifdef PC
 #define IP_SERVEUR      "127.0.0.1"
+#else
+#define IP_SERVEUR      "172.20.10.7"// "127.0.0.1"
+#endif
+
+pthread_mutex_t mutexSerialPort = PTHREAD_MUTEX_INITIALIZER;
 
 
-pthread_mutex_t *mutexSerialPort;
 
 int sd =-1;
 int portArduino =-1;
@@ -40,7 +44,19 @@ void *threadGetAndSendPositionMarvelmind(void *arg){
             positionTemp->x = 1000 + rand() % 1000;
             positionTemp->y = 1000 + rand() % 1000;
         #else
-        if (!robotMarvelmind->hedge->terminationRequired) getPositionMarvelmind(robotMarvelmind, positionTemp);
+        if (!robotMarvelmind->hedge->terminationRequired){
+
+            if (clock_gettime(0, &tsMM) == -1)
+            {       
+                printf("clock_gettime error");
+                exit(EXIT_FAILURE);
+            }
+
+            tsMM.tv_sec += 2; // Voir si on peut pas virer ca 
+            sem_timedwait(semMM,&tsMM);
+            getPositionMarvelmind(robotMarvelmind, positionTemp);
+            
+        } 
         else getPostionOn = 0;
         #endif 
         
@@ -55,9 +71,9 @@ void *threadGetAndSendPositionMarvelmind(void *arg){
         
 
         #ifndef PC
-        pthread_mutex_lock(mutexSerialPort);
+        pthread_mutex_lock(&mutexSerialPort);
         writeSerial(portArduino, buffer, size);
-        pthread_mutex_unlock(mutexSerialPort);
+        pthread_mutex_unlock(&mutexSerialPort);
 
         #endif
         
@@ -125,7 +141,9 @@ void bye(){
     #ifndef PC
     destroyRobotMarvelmind(robotMarvelmind);
     closeSerialPort(portArduino);
-    pthread_mutex_destroy(mutexSerialPort);
+    pthread_mutex_destroy(&mutexSerialPort);
+
+    free(semMM);
     #endif
 
     closeReseauClient(sd);
@@ -135,10 +153,13 @@ void bye(){
 
 int main(int argc, char const *argv[])
 {
+    DEBUG_PRINT("Debut du programme\n");
     // Installation du gestionnaire de fin de programme
     atexit(bye);
 
+    
     // Installation du gestionnaire de signaux pour géré le ctrl c et la fin d'un fils.
+    DEBUG_PRINT("Initialisation du gestionnaire de signaux\n");
     struct sigaction newAction;
     newAction.sa_handler = signalHandler;
     CHECK(sigemptyset(&newAction.sa_mask ), " sigemptyset ()");
@@ -148,17 +169,27 @@ int main(int argc, char const *argv[])
     #ifndef PC
 
     // Initialisation du port serie pour l'arduino
-    portArduino = openSerialPort(PORT_ARDUINO);
+    DEBUG_PRINT("Ouverture du port serie pour l'arduino\n");
+    
+    CHECK(portArduino = openSerialPort(PORT_ARDUINO), "main: openSerialPort(PORT_ARDUINO)");
     setSerialPort(portArduino);
-    CHECK_T(pthread_mutex_init(mutexSerialPort, NULL), "main: pthread_mutex_init(&mutexSerialPort, NULL)");
 
-    // Initialisation du marvelmind
+    DEBUG_PRINT("Initialisation de la mutex pour le port serie\n");
+    CHECK_T(pthread_mutex_init(&mutexSerialPort, NULL), "main: pthread_mutex_init(&mutexSerialPort, NULL)");
+
+     // Initialisation du marvelmind
+    DEBUG_PRINT("Initialisation du marvelmind\n");
+    CHECK_NULL(semMM = malloc(sizeof(sem_t)), "main: malloc(sizeof(sem_t))");
     robotMarvelmind = malloc(sizeof(struct RobotMarvelmind));
     initRobotMarvelmind(robotMarvelmind, PORT_MARVELMIND, ADDRESS_MM);
 
     #endif
 
+   
+
+
     // Initialisation du reseau
+    DEBUG_PRINT("Initialisation du reseau\n");
     initReseauClient(&sd, IP_SERVEUR);
     
     // Creation des threads
@@ -168,11 +199,16 @@ int main(int argc, char const *argv[])
     CHECK_T(pthread_create(&threadMarvelmind, NULL, threadGetAndSendPositionMarvelmind, NULL), "main: pthread_create(&threadMarvelmind)");
     CHECK_T(pthread_create(&threadReadReseau, NULL, threadReceptionReseau, NULL), "main: pthread_create(&threadReadReseau)");
 
-    
-    
+    #ifndef PC
+    // CHECK_T(pthread_create(&threadReadArduino, NULL, threadReceptionSerie, NULL), "main: pthread_create(&threadReadArduino)");
+
+    // pthread_join(threadReadArduino, NULL);
+    #endif
 
     // Attente de la fin des thread
     pthread_join(threadMarvelmind, NULL);
+    pthread_join(threadReadReseau, NULL);
+   
 
     return 0;
 }

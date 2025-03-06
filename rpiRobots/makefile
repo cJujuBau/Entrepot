@@ -10,6 +10,10 @@ ifeq ($(PC), 1)
 	CFLAGS +=-DDEBUG
 endif
 
+ifeq ($(PI), 1)
+	CFLAGS +=-DDEBUG
+endif
+
 all: bin/main
 
 ###########################
@@ -51,6 +55,9 @@ bin/serial: src/serial.c
 
 bin/marvelmindClient: src/marvelmind.c  src/marvelmindClient.c 
 	gcc $(CFLAGS) $^ -o $@ $(LIBS)
+
+bin/marvelmindClientDEBUG: src/marvelmind.c  src/marvelmindClient.c
+	gcc $(CFLAGS) $(CSTFLAGS) -DTEST_MM $^ -o $@ $(LIBS)
 
 
 ###########################

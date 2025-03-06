@@ -7,7 +7,7 @@
 
 #ifndef __UTIL_H
 
-#define __UTIL_H
+#define __UTIL_H 1
 
 /* ------------------------------------------------------------------------ */
 /*                   E N T Ê T E S    S T A N D A R D S                     */

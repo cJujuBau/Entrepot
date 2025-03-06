@@ -7,9 +7,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <signal.h>
-#include <semaphore.h>
-#include <time.h>
 
+
+struct timespec tsMM;
 
 
 
@@ -23,16 +23,15 @@ void CtrlHandler(int signum)
 
 
 
-static sem_t *sem;
-struct timespec ts;
+
 void semCallback()
 {
-	sem_post(sem);
+	sem_post(semMM);
 }
 
 void initRobotMarvelmind(RobotMarvelmind robotMarvelmind, const char* ttyFileName, const int address){
 
-    CHECK_NULL(sem = sem_open(DATA_INPUT_SEMAPHORE, O_CREAT, 0777, 0), "initRobotMarvelmind: sem_open(DATA_INPUT_SEMAPHORE)");
+    CHECK_NULL(semMM = sem_open(DATA_INPUT_SEMAPHORE, O_CREAT, 0777, 0), "initRobotMarvelmind: sem_open(DATA_INPUT_SEMAPHORE)");
 
     robotMarvelmind->address = address;
     robotMarvelmind->hedge = createMarvelmindHedge();
@@ -42,6 +41,12 @@ void initRobotMarvelmind(RobotMarvelmind robotMarvelmind, const char* ttyFileNam
     robotMarvelmind->hedge->verbose = true; // show errors and warnings
     robotMarvelmind->hedge->anyInputPacketCallback = semCallback;
     startMarvelmindHedge(robotMarvelmind->hedge);
+
+    if (robotMarvelmind->hedge->terminationRequired)
+    {
+        puts("marvelmindClient.c : Error-Unable to start MarvelmindHedge");
+        exit(EXIT_FAILURE);
+    }
 }
 
 void destroyRobotMarvelmind(RobotMarvelmind robotMarvelmind){
@@ -49,7 +54,7 @@ void destroyRobotMarvelmind(RobotMarvelmind robotMarvelmind){
     destroyMarvelmindHedge(robotMarvelmind->hedge);
     free(robotMarvelmind);
 
-    sem_close(sem);
+    sem_close(semMM);
     sem_unlink(DATA_INPUT_SEMAPHORE);
 }
 
@@ -63,7 +68,8 @@ void getPositionMarvelmind(RobotMarvelmind robotMarvelmind, Position position){
 
         getPositionFromMarvelmindHedgeByAddress(hedge, &positionMM, robotMarvelmind->address);
         
-        if (positionMM.ready==true ){ // Voir s'il faut mettre un max et min sur le svaleurs
+
+        if (positionMM.ready==true && positionMM.x < MAX_COORD && positionMM.x > MIN_COORD){ // Voir s'il faut mettre un max et min sur le svaleurs
             position->x= positionMM.x;
             position->y= positionMM.y;
             
@@ -75,18 +81,20 @@ void getPositionMarvelmind(RobotMarvelmind robotMarvelmind, Position position){
 // A supprimer comme fonction
 void printPositionMarvelmindRobot(RobotMarvelmind robotMarvelmind){
     Position position = malloc(sizeof(struct Position));
+    position->x = 0;
+    position->y = 0;
+
 
     while ((!terminateProgram) && (!robotMarvelmind->hedge->terminationRequired))
     {
         
-        if (clock_gettime(0, &ts) == -1)
-		{
-			printf("clock_gettime error");
-			exit(EXIT_FAILURE);
-		}
-		ts.tv_sec += 2; // Voir si on peut pas virer ca 
-		sem_timedwait(sem,&ts);
-
+        if (clock_gettime(0, &tsMM) == -1)
+            {       
+                printf("clock_gettime error");
+                exit(EXIT_FAILURE);
+            }
+        tsMM.tv_sec += 2; // Voir si on peut pas virer ca 
+        sem_timedwait(semMM,&tsMM);
 
         getPositionMarvelmind(robotMarvelmind, position);
         DEBUG_PRINT("Position x: %d, y: %d\n", position->x, position->y);
@@ -95,7 +103,12 @@ void printPositionMarvelmindRobot(RobotMarvelmind robotMarvelmind){
 
 }
 
-/*
+
+#ifdef TEST_MM
+
+#define PORT_MARVELMIND "/dev/ttyACM0"
+#define ADDRESS_MM      12
+RobotMarvelmind robotMarvelmind;
 // Bien verifier que le marvelmind soit defini en 115200 en baudrate, sinon voir sur le dashboard dans interface
 
 int main (int argc, char *argv[])
@@ -117,4 +130,5 @@ int main (int argc, char *argv[])
     exit(EXIT_SUCCESS);
     return 0;
 }
-*/
+
+#endif

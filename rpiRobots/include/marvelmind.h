@@ -14,6 +14,10 @@
 #endif
 // -----
 
+#ifndef CRTSCTS
+# define CRTSCTS 020000000000 /* Flow control.  */
+#endif
+
 #define DATA_INPUT_SEMAPHORE "/mm_data_input_semaphore"
 
 #ifdef _WIN64
