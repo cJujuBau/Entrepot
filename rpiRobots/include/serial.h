@@ -41,7 +41,7 @@
 int openSerialPort(const char* portStr);
 void setSerialPort(int port);
 void writeSerial(int port, const char* data, const int size);
-void readSerial(int port, char* buffer, int size);
+int readSerial(int port, char* buffer, int size);
 void closeSerialPort(int port);
 
 void *threadReceptionSerie(void *arg);

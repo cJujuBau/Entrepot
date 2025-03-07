@@ -7,9 +7,12 @@
 #include <string.h>
 
 #include <serial.h>
+#include <reseauClient.h>
 
 # define CRTSCTS 020000000000 /* Flow control.  */
-#include <serial.h>
+
+
+#define FIRST_CHAR_HUMAN_READABLE 32
 
 int portArduino = -1;                      // Définition unique
 pthread_mutex_t mutexSerialPort = PTHREAD_MUTEX_INITIALIZER;
@@ -58,43 +61,56 @@ void writeSerial(int port, const char* data, const int size){
     CHECK(write(port, buffer, new_size), "writeSerial: Write to serial failed!");
 }
 
-void readSerial(int port, char* buffer, int size){
+int readSerial(int port, char* buffer, int size){
     char single_char;
     int index = 0;
     int reception = 0;
+    char buffTemp[size];
+
     while (1)
     {
         reception = read(port, &single_char, 1); // Lire 1 caractère
         if (reception > 0)
         {
-            buffer[index++] = single_char;
-            // DEBUG_PRINT("Caractere recu : %c et %d\n", single_char, single_char); 
-
+            // DEBUG_PRINT("readSerial : Caractere recu : %c et %d\n", single_char, single_char);
+            if (single_char >= FIRST_CHAR_HUMAN_READABLE ) buffTemp[index++] = single_char;
             if (single_char == '\n' || index > size) break;
 
         }
         else if (reception == -1)
         {
             perror("Erreur lecture port serie");
-            break;
+            return -1;
         }
     }
 
     // Terminer la chaîne de caractères
-    buffer[index] = '\0';
+    // DEBUG_PRINT("readSerial: index=%d, buffer=%s\n", index, buffer);
+
+    if (index > 0) {
+        buffTemp[index] = '\0';
+        strcpy(buffer, buffTemp);
+    }
 
     // Afficher le message reçu
     // if (index > 0) DEBUG_PRINT("Message reçu : %s\n", buffer);
     // else printf("Aucune donnee recue.\n");
 
     // DEBUG_PRINT("Reception finie.\n");
+    return index;
 }
 void *threadReceptionSerie(void *arg){
     char buffer[100];
+    int nbChar = 0;
     while (receptionSerieEnCours)
     {
-        readSerial(portArduino, buffer, 100); // Voir si ca ne bloque pas le port serie et mettre la mutex
-        DEBUG_PRINT("threadReceptionSerie: buffer=%s\n", buffer);
+        nbChar = readSerial(portArduino, buffer, 100); // Voir si ca ne bloque pas le port serie et mettre la mutex
+        // DEBUG_PRINT("threadReceptionSerie: buffer=%s, nbCharRecu=%d\n", buffer, nbChar);
+        if (nbChar > 0)
+        {
+            DEBUG_PRINT("threadReceptionSerie: buffer=%s\n", buffer);
+            if (buffer[0] == 'o') sendObstacleDetected(buffer, nbChar);
+        }
     }
 
     return NULL;

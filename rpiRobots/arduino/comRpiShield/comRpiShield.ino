@@ -3,6 +3,7 @@
 
 int xMM, yMM;
 int xRef, yRef, oRef;
+int x, y, O;
 
 
 void setup() {
@@ -19,13 +20,17 @@ void loop() {
   if (Serial2.available()) {
     char data2 = Serial2.read();
     if (data2 == 'p') getPosMM();
-    if (data2 == 'r') getPosRef();
+    else if (data2 == 'r') getPosRef();
+    else if (data2 == '\n' || data2 == '\r') data2 = 0;
+    else Serial.write(data2);
     //Serial.write(data2);  // Optional: send data to Serial Monitor for debugging
   }
 
   if (Serial.available()) {
     char data = Serial.read();
-    if (data =='a') Serial2.write("OuiOuiBagette\n");
+    if (data == 'a') Serial2.write("OuiOuiBagette\n");
+    else if (data == 'o') sendObstacleDetected();
+    else Serial2.write(data);
     //Serial2.write(data);  // Send data from Serial Monitor to Raspberry Pi
   }
 
@@ -108,3 +113,11 @@ void getPosRef() {
   Serial.print(", oRef=");
   Serial.println(oRef);
 }
+
+void sendObstacleDetected(){
+  char cmd[25];
+  sprintf(cmd, "o:%d,%d,%d\r\n", xMM, yMM, random(0,361));
+  Serial2.write(cmd);
+  Serial2.flush();
+}
+  

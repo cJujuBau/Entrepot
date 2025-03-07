@@ -8,6 +8,7 @@
 
 int sd =-1;
 int receptionReseauEnCours = 1;
+extern int id;
 
 void initReseauClient(int *sd, const char *ipServeur){
     
@@ -45,6 +46,13 @@ int closeReseauClient(int sd){
     return close(sd);
 }
 
+void sendObstacleDetected(const char *buffer, int size){
+    int sent =  sendToServer(sd, id, buffer, size);
+    if (sent < 0)
+    {
+        perror("sendObstacleDetected: sendToServer failed");
+    }
+}
 
 void *threadReceptionReseau(void *arg){
     char buffer[100];

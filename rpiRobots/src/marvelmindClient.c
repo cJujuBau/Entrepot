@@ -92,10 +92,12 @@ void getPositionMarvelmind(RobotMarvelmind robotMarvelmind, Position position){
 }
 
 
-
+#ifndef TEST_MM
 
 void *threadGetAndSendPositionMarvelmind(void *arg){
     Position positionTemp = malloc(sizeof(struct Position));
+    int size = -1;
+    char buffer[20];
 
     while (getPostionOn)
     {
@@ -120,11 +122,8 @@ void *threadGetAndSendPositionMarvelmind(void *arg){
         #endif 
         
         DEBUG_PRINT("threadGetAndSendPositionMarvelmind: x=%d, y=%d\n", positionTemp->x, positionTemp->y);
-        
-        
-        char buffer[20];
-        int size = -1;
-        sprintf(buffer, "p:%d,%d;", positionTemp->x, positionTemp->y);
+
+        encodePosition(buffer, positionTemp); // Faire renvoyer un la taille
         size = strlen(buffer);
         DEBUG_PRINT("threadGetAndSendPositionMarvelmind: sentBuffer=%s\n", buffer);
         
@@ -151,7 +150,12 @@ void *threadGetAndSendPositionMarvelmind(void *arg){
     return NULL;
 }
 
+void encodePosition(char buffer[20], Position positionTemp)
+{
+    sprintf(buffer, "p:%d,%d;", positionTemp->x, positionTemp->y);
+}
 
+#endif
 
 
 

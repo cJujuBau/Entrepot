@@ -41,6 +41,7 @@ int sendToServer(int sd, const int id, const char *msg, const int size);
 int closeReseauClient(int sd);
 
 void *threadReceptionReseau(void *arg);
+void sendObstacleDetected(const char *buffer, int size);
 
 
 /* ------------------------------------------------------------------------ */
