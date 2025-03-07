@@ -22,7 +22,11 @@ void Motor::init() {
     pinMode(this->BI2, OUTPUT);
     pinMode(this->PWMB, OUTPUT);
 
-    attachInterrupt(digitalPinToInterrupt(this->VA), onRisingEdge, RISING);
+    //attachInterrupt(digitalPinToInterrupt(this->VA), onRisingEdge, RISING);
+}
+
+int Motor::getVA() {
+    return VA;
 }
 
 float Motor::getSpeed() {
@@ -44,27 +48,27 @@ void Motor::updateSpeed(){
 }
 
 void Motor::onRisingEdge(){
-    if (instance) {
-        instance->handleRisingEdge();
+    if (digitalRead(VB)) {
+        pulse++;
+    } else {
+        pulse--;
     }
 }
 
 void Motor::handleRisingEdge() {
-  if (digitalRead(VB)) {
-    pulse++;
-  } else {
-    pulse--;
-  }
+    if (instance) {
+        instance->onRisingEdge();
+    }
 }
 
 void Motor::setVoltage(const float voltage) {
-    u = voltage * sens;
+    this->u = voltage * sens;
 }
 
 void Motor::applyVoltage(){
     float voltage = u;
 
-    if (abs(voltage) < 1) { voltage = 0; }
+    if (myAbs(voltage) < 1) { voltage = 0; }
     if (voltage > 0) {
         digitalWrite(BI2, LOW);
         digitalWrite(BI1, HIGH);
@@ -72,14 +76,16 @@ void Motor::applyVoltage(){
         digitalWrite(BI1, LOW);
         digitalWrite(BI2, HIGH);
     }
-
-    analogWrite(PWMB, convertToPWM(abs(voltage)));
+    analogWrite(PWMB, convertToPWM(myAbs(voltage)));
 }
+
 
 MotorController::MotorController(double Km, double Ki, double ref) : Km(Km), Ki(Ki), ref(ref) {}
 
 void MotorController::setReference(double ref) {
     this->ref = ref;
+    Serial.print("ref : ");
+    Serial.println(ref);
 }
 
 void MotorController::updateOutput(Motor &motor) {

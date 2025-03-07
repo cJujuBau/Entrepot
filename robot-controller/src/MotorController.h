@@ -12,6 +12,10 @@ public:
     void applyVoltage();
     float getSpeed();
 
+    int getVA();
+    static void handleRisingEdge();
+    void onRisingEdge();
+
 private:
     int motorSpeed;
     int BI1; // BI1 pin number
@@ -28,9 +32,6 @@ private:
     long tempsPrec;
 
     static Motor* instance;
-
-    static void onRisingEdge();
-    void handleRisingEdge();
 
     void updateSpeed();
 };

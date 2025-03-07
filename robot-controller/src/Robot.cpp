@@ -2,8 +2,9 @@
 #include "InverseMotorModel.h"
 #include "utils/Utils.h"
 #include "Robot.h"
+#include <math.h>
 
-Robot::Robot(Point pos, Motor motorLeft, Motor motorRight, MotorController motorControllerLeft, MotorController motorControllerRight, InverseMotorModel inverseMotorModel, double theta) 
+Robot::Robot(struct Point pos, Motor& motorLeft, Motor& motorRight, MotorController& motorControllerLeft, MotorController& motorControllerRight, InverseMotorModel& inverseMotorModel, double theta) 
 : pos(pos), motorLeft(motorLeft), motorRight(motorRight), theta(theta), v(0), w(0), 
 motorControllerLeft(motorControllerLeft), motorControllerRight(motorControllerRight), inverseMotorModel(inverseMotorModel) {}
 
@@ -11,7 +12,7 @@ void Robot::updateState(){
     double Vg = motorLeft.getSpeed();
     double Vd = motorRight.getSpeed();
     v = (Vg + Vd)/2;
-    w = (Vg - Vd)/(2 * WIDTH);
+    w = (Vd - Vg)/(2 * WIDTH);
     
     double dx = cos(theta) * v - LENGTH * sin(theta) * w;
     double dy = sin(theta) * v + LENGTH * cos(theta) * w;

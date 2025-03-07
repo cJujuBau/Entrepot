@@ -1,8 +1,8 @@
 #include "InverseMotorModel.h"
-#include "MotorController.h"
-#include "utils/Utils.h"
+#include "Arduino.h"
+#include <math.h>
 
-void InverseMotorModel::setReference(Point new_pos_ref) {
+void InverseMotorModel::setReference(struct Point new_pos_ref) {
     pos_ref = new_pos_ref;
 }
 

@@ -1,19 +1,24 @@
 #pragma once
 
+#include "utils/Utils.h"
+#include "MotorController.h"
+#include "InverseMotorModel.h"
+
 class Robot {
 public:
-    Robot(Point pos, Motor motorLeft, Motor motorRight, MotorController motorControllerLeft, MotorController motorControllerRight, InverseMotorModel InverseMotorModel, double theta);
+    Robot(struct Point pos, Motor& motorLeft, Motor& motorRight, MotorController& motorControllerLeft, MotorController& motorControllerRight, InverseMotorModel& inverseMotorModel, double theta);
     void updateState();
     void readMarvelmind();
     double getTheta();
 
+    struct Point pos;
+    Motor& motorLeft;
+    Motor& motorRight;
+    MotorController& motorControllerLeft;
+    MotorController& motorControllerRight;
+    InverseMotorModel& inverseMotorModel;
+
 private:
-    Point pos;
-    Motor motorLeft;
-    Motor motorRight;
-    MotorController motorControllerLeft;
-    MotorController motorControllerRight;
-    InverseMotorModel inverseMotorModel;
     double theta;
     double v, w;
 };

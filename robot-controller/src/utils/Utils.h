@@ -8,16 +8,16 @@
 #define WIDTH 85 // width/2 of the robot in mm (distance between wheels)
 #define LENGTH 115 // length/2 of the robot in mm (front to back)
 
-#define REDUCTION_RATE 46
-#define WHEEL_RADIUS 30
+#define REDUCTION_RATE 46.
+#define WHEEL_RADIUS 30.
 #define MS_TO_S 1e-3
-#define PULSE_PER_TURN 8
+#define PULSE_PER_TURN 8.
 
 // Function to convert a value to PWM
 int convertToPWM(int value);
 
 // Return the absolute value of a number
-float abs(float value);
+float myAbs(float value);
 
 // Structure to represent a point
 struct Point {
