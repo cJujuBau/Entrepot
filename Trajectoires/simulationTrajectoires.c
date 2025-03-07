@@ -7,12 +7,18 @@
 #define NOMBRE_ETAGERES 4
 #define NOMBRE_ALLEES (NOMBRE_ETAGERES - 1)
 #define NOMBRE_ROBOTS 3
-//#define NOMBRE_SECTIONS_PRINCIPALES 2*NOMBRE_ALLEES + 7 + NOMBRE_ROBOTS // attention il faut que cette variable soit dynamique
-#define NOMBRE_SECTIONS_PRINCIPALES 4
+#define NOMBRE_SECTIONS_PRINCIPALES (2*NOMBRE_ALLEES + 7) // attention il faut que cette variable soit dynamique
 #define LARGEUR_ALLEE 50
-#define VITESSE_ROBOT 0.2
+#define VITESSE_ROBOT 1
+#define LONGUEUR_ETAGERE 400
+#define LARGEUR_ETAGERE 100
+#define LONGUEUR_BAC 250
+#define LARGEUR_BAC 100
+#define ECART_LONGUEUR 300
+#define LONGUEUR_ENVIRONNEMENT 2000
+#define LARGEUR_ENVIRONNEMENT 1000
 
-sfVideoMode mode = {2000, 1000, 32};
+sfVideoMode mode = {LONGUEUR_ENVIRONNEMENT, LARGEUR_ENVIRONNEMENT, 32};
 sfRenderWindow *window;
 sfRectangleShape *etagere[NOMBRE_ETAGERES];
 sfRectangleShape *bac[2]; // 2 bacs : parametre non scalable
@@ -66,7 +72,15 @@ void actualisePositionRobot(robot* rbt, sfVector2f nouvellePosition)
     sfCircleShape_setPosition(rbt->cercle,nouvellePosition);
 }
 
-void creer_robot(robot** r) {
+// met à jour le numero de la section et du wayPoint du robot
+void actualiseSectionWayPointRobot(robot* rbt, int n_section, int n_wayPoint)
+{
+    rbt->numero_section = n_section;
+    rbt->numero_wayPoint = n_wayPoint;
+}
+
+// fonction qui rée le robot utilisé pour les tests à la section n_section et au wayPoint n_wayPoint
+void creer_robot(robot** r, int n_section, int n_wayPoint) {
     *r = malloc(sizeof(robot)); // Alloue la mémoire pour le robot
     if (*r == NULL) {
         perror("Erreur malloc robot");
@@ -80,26 +94,24 @@ void creer_robot(robot** r) {
         exit(EXIT_FAILURE);
     }
     rbt->cercle = sfCircleShape_create();
-    rbt->numero_section = 2; // section initiale du robot, fixe pour le moment
-    rbt->numero_wayPoint = 1; // wayPoint initial
-    sfVector2f pos = s_principale[2]->point_section[1];
+    actualiseSectionWayPointRobot(rbt,n_section,n_wayPoint);
+    sfVector2f pos = s_principale[n_section]->point_section[n_wayPoint];
     actualisePositionRobot(rbt,pos);
     sfCircleShape_setRadius(rbt->cercle, 25); // rayon fixe pour le moment
     sfCircleShape_setFillColor(rbt->cercle,sfRed);
 }
 
-void actualiseSectionWayPointRobot(robot* rbt, int n_section, int n_wayPoint)
-{
-    rbt->numero_section = n_section;
-    rbt->numero_wayPoint = n_wayPoint;
-}
-
+// creer l'environneùent de travail
 void setupEnvironment() {
+
+    // creation de la fenetre
     window = sfRenderWindow_create(mode, "CSFML Example", sfResize | sfClose, NULL);
     if (!window) {
         printf("Erreur: Impossible de créer la fenêtre.\n");
         return;
     }
+
+    int longueurTotaleEtageres = LONGUEUR_ENVIRONNEMENT - 2*ECART_LONGUEUR;
 
     // creation des etageres
     for (int i = 0; i < NOMBRE_ETAGERES; i++) {
@@ -109,8 +121,8 @@ void setupEnvironment() {
             return;
         }
 
-        sfVector2f size = {100, 400};
-        sfVector2f pos = {i * (1400 / NOMBRE_ETAGERES)+300, 30}; // Espacement correct
+        sfVector2f size = {LARGEUR_ETAGERE, LONGUEUR_ETAGERE};    
+        sfVector2f pos = {i * (longueurTotaleEtageres / NOMBRE_ETAGERES)+ECART_LONGUEUR, 0}; 
 
         sfRectangleShape_setSize(etagere[i], size);
         sfRectangleShape_setFillColor(etagere[i], sfGreen);
@@ -125,8 +137,8 @@ void setupEnvironment() {
             return;
         }
 
-        sfVector2f size = {100, 250};
-        sfVector2f pos = {i * (1400 / NOMBRE_ETAGERES)+300, 750}; // Espacement correct
+        sfVector2f size = {LARGEUR_BAC, LONGUEUR_BAC};
+        sfVector2f pos = {i * (longueurTotaleEtageres  / NOMBRE_ETAGERES)+ECART_LONGUEUR, (LARGEUR_ENVIRONNEMENT - LONGUEUR_BAC)}; 
 
         sfRectangleShape_setSize(bac[i], size);
         sfRectangleShape_setFillColor(bac[i], sfGreen);
@@ -134,38 +146,45 @@ void setupEnvironment() {
     }
 
     // dessin d'un robot pour le moment (a adapter quand on augmente le nombre de robots)
-    creer_robot(&rbt);
-    //sfVector2f pos = {300,450};
+    creer_robot(&rbt,0,0); // section 0, wayPoint 0
     
 }
 
+// creation des sections du cycle principal
 void creer_cycle_principal()
 {
+    // sfVector2f pos = {i * (1400 / NOMBRE_ETAGERES)+300, 30}; // Espacement correct
+
+    int pos0[4];
+    pos0[0] = 1725;
+    pos0[1] = 670;
+    pos0[2] = 1725;
+    pos0[3] = 460;
+    s_principale[0] = creer_section(2,pos0); // je créer la section 0 du cycle principal
+
     int pos[2];
-    pos[0] = 400;
-    pos[1] = 450;
-    s_principale[0] = creer_section(1,pos); // je créer la section 0 du cycle principal
-    int pos2[2];
-    pos2[0] = 500;
-    pos2[1] = 450;
-    s_principale[1] = creer_section(1,pos2);
-    //printf("Section 1 à la création : (%f,%f) \n", s_principale[1]->point_section->x, s_principale[1]->point_section->y);
-    int pos3[4];
-    pos3[0] = 600;
-    pos3[1] = 450;
-    pos3[2] = 600;
-    pos3[3] = 600;
-    s_principale[2] = creer_section(2,pos3);
-    int pos4[6];
-    pos4[0] = 600;
-    pos4[1] = 500;
-    pos4[2] = 700;
-    pos4[3] = 500;
-    pos4[4] = 600;
-    pos4[5] = 600;
-    s_principale[3] = creer_section(3,pos4);
+    for(int i=1; i <= (NOMBRE_ALLEES + NOMBRE_ETAGERES) + 1; i++)
+    {
+        pos[0] = 1725 - (i+1) * (700 / NOMBRE_ETAGERES);
+        pos[1] = 460;
+        s_principale[i] = creer_section(1,pos);
+    }
+    pos[0] = 1725 - ((NOMBRE_ALLEES + NOMBRE_ETAGERES) + 2) * (700 / NOMBRE_ETAGERES);
+    pos[1] = 670;
+    s_principale[(NOMBRE_ALLEES + NOMBRE_ETAGERES) + 2] = creer_section(1,pos);
+
+    for(int i=0; i <= 4; i++)
+    {
+        pos[0] = 325 + i * (700 / NOMBRE_ETAGERES);
+        pos[1] = 670;
+        s_principale[(NOMBRE_ALLEES + NOMBRE_ETAGERES) + 3 + i] = creer_section(1,pos);
+    }
+    pos[0] = ((325 + 4 * (700 / NOMBRE_ETAGERES)) + 1725) / 2;
+    pos[1] = 670;
+    s_principale[NOMBRE_SECTIONS_PRINCIPALES - 1] = creer_section(1,pos);
 }
 
+// fermer la fenetre quand on clique sur la croix
 void processEvents()
 {
     sfEvent event;
@@ -176,6 +195,7 @@ void processEvents()
     }
 }
 
+// mettre a jour la fenetre
 void render()
 {
     sfRenderWindow_clear(window, sfBlack);
@@ -219,6 +239,7 @@ int Deplacement_elementaire(robot* rbt, sfVector2f posfinale)
     return 0; // on est arrivé à destination
 }
 
+// fonction de test unitaire pour tester si le robot arrive a avancer jusqu'à un point précis
 void testAvancer()
 {
     //sfVector2f pos = {((rbt->pos)->x)+1,((rbt->pos)->y)+1};
@@ -229,7 +250,7 @@ void testAvancer()
 }
 
 // fonction qui amène le robot au dernier wayPoint de la section passée en argument
-int testDeplacement(int numero_section_objectif)
+int deplacementSection(robot* rbt, int numero_section_objectif)
 {
     int resultat_deplacement;
     int indice_prochaine_section;
@@ -262,6 +283,7 @@ int testDeplacement(int numero_section_objectif)
 
 }
 
+// effacer la fenetre
 void clean()
 {
     // Libération de la mémoire
@@ -290,12 +312,14 @@ int main()
         processEvents();
         render();
         //testAvancer();
-        if(testDeplacement(0) == 0)
+        if(deplacementSection(rbt,12) == 0)
         {
-            //printf("On est arrivé ! \n");
+            printf("On est arrivé ! \n");
+            clean();
+            return 0;
         }
         sleep(0.5);
-        compteur++;
+        compteur++; // compteur utilisé pour logger pas trop souvent
     }
     clean();
     return 0;
