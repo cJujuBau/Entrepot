@@ -39,6 +39,8 @@
 /* ------------------------------------------------------------------------ */
 
 extern int id;
+extern int raspiOn; // Si on complie sur le raspberry connecté à l'Arduino
+extern int marvelmindOn; // Si on compile sur le raspberry connecté au marvelmind
 
 
 /* ------------------------------------------------------------------------ */

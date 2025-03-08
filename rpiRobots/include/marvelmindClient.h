@@ -34,6 +34,6 @@ void printPositionMarvelmindRobot(RobotMarvelmind robotMarvelmind);
 
 void *threadGetAndSendPositionMarvelmind(void *arg);
 
-void encodePosition(char buffer[20], Position positionTemp);
+int encodePosition(char buffer[20], const Position position);
 
 #endif

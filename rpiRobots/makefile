@@ -5,17 +5,10 @@ CSTFLAGS =-DDEBUG
 
 LIBS=-lpthread
 
-ifeq ($(PC), 1)
-	CFLAGS +=-DPC
+ifeq ($(D), 1)
 	CFLAGS +=-DDEBUG
 endif
 
-# Pour test sur pi sans le marvelmind
-ifeq ($(PI), 1)
-	CFLAGS +=-DPI
-	CFLAGS +=-DPC
-	CFLAGS +=-DDEBUG
-endif
 
 all: bin/main
 
@@ -46,7 +39,7 @@ bin/main.o: src/main.c
 ###########################	
 
 
-bin/serialDEBUG: src/serial.c
+bin/serialTEST: src/serial.c
 	gcc $(CFLAGS) $(CSTFLAGS) -DTEST_SERIAL $^ -o $@ $(LIBS)
 
 bin/serial: src/serial.c
@@ -59,7 +52,7 @@ bin/serial: src/serial.c
 bin/marvelmindClient: src/marvelmind.c  src/marvelmindClient.c 
 	gcc $(CFLAGS) $^ -o $@ $(LIBS)
 
-bin/marvelmindClientDEBUG: src/marvelmind.c  src/marvelmindClient.c
+bin/marvelmindClientTEST: src/marvelmind.c  src/marvelmindClient.c
 	gcc $(CFLAGS) $(CSTFLAGS) -DTEST_MM $^ -o $@ $(LIBS)
 
 

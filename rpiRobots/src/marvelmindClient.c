@@ -42,21 +42,22 @@ void initRobotMarvelmind(RobotMarvelmind robotMarvelmind, const char* ttyFileNam
 
     robotMarvelmind->address = address;
 
-    #ifndef PC
-    robotMarvelmind->hedge = createMarvelmindHedge();
-    CHECK_NULL(robotMarvelmind->hedge, "Error: Unable to create MarvelmindHedge");
+    if (marvelmindOn){
+        robotMarvelmind->hedge = createMarvelmindHedge();
+        CHECK_NULL(robotMarvelmind->hedge, "Error: Unable to create MarvelmindHedge");
 
-    robotMarvelmind->hedge->ttyFileName = ttyFileName;
-    robotMarvelmind->hedge->verbose = true; // show errors and warnings
-    robotMarvelmind->hedge->anyInputPacketCallback = semCallback;
-    startMarvelmindHedge(robotMarvelmind->hedge);
+        robotMarvelmind->hedge->ttyFileName = ttyFileName;
+        robotMarvelmind->hedge->verbose = true; // show errors and warnings
+        robotMarvelmind->hedge->anyInputPacketCallback = semCallback;
+        startMarvelmindHedge(robotMarvelmind->hedge);
 
-    if (robotMarvelmind->hedge->terminationRequired)
-    {
-        puts("marvelmindClient.c : Error-Unable to start MarvelmindHedge");
-        exit(EXIT_FAILURE);
-    }
-    #endif
+        if (robotMarvelmind->hedge->terminationRequired)
+        {
+            puts("marvelmindClient.c : Error-Unable to start MarvelmindHedge");
+            exit(EXIT_FAILURE);
+        }
+    } 
+    else robotMarvelmind->hedge = NULL;
 }
 
 void destroyRobotMarvelmind(RobotMarvelmind robotMarvelmind){
@@ -72,91 +73,85 @@ void destroyRobotMarvelmind(RobotMarvelmind robotMarvelmind){
 }
 
 
-
+// A TESTER
 void getPositionMarvelmind(RobotMarvelmind robotMarvelmind, Position position){
     struct MarvelmindHedge * hedge = robotMarvelmind->hedge;
     struct PositionValue positionMM;
 
-    if (hedge->haveNewValues_){
-
-        getPositionFromMarvelmindHedgeByAddress(hedge, &positionMM, robotMarvelmind->address);
-        
-
-        if (positionMM.ready==true && positionMM.x < MAX_COORD && positionMM.x > MIN_COORD){ // Voir s'il faut mettre un max et min sur le svaleurs
-            position->x= positionMM.x;
-            position->y= positionMM.y;
-            
-            hedge->haveNewValues_=false;
-        }
-    }
-}
-
-
-#ifndef TEST_MM
-
-void *threadGetAndSendPositionMarvelmind(void *arg){
-    Position positionTemp = malloc(sizeof(struct Position));
-    int size = -1;
-    char buffer[20];
-
-    while (getPostionOn)
-    {
-        #ifdef PC
-            positionTemp->x = 1000 + rand() % 1000;
-            positionTemp->y = 1000 + rand() % 1000;
-        #else
+    if (marvelmindOn){
         if (!robotMarvelmind->hedge->terminationRequired){
-
-            if (clock_gettime(0, &tsMM) == -1)
-            {       
+            if (clock_gettime(0, &tsMM) == -1){       
                 printf("clock_gettime error");
                 exit(EXIT_FAILURE);
             }
 
             tsMM.tv_sec += 2; // Voir si on peut pas virer ca 
             sem_timedwait(semMM,&tsMM);
-            getPositionMarvelmind(robotMarvelmind, positionTemp);
-            
+
+
+            if (hedge->haveNewValues_){
+                getPositionFromMarvelmindHedgeByAddress(hedge, &positionMM, robotMarvelmind->address);
+        
+                if (positionMM.ready==true && positionMM.x < MAX_COORD && positionMM.x > MIN_COORD){
+                    position->x= positionMM.x;
+                    position->y= positionMM.y;
+                    
+                    hedge->haveNewValues_=false;
+                }
+            }
         } 
         else getPostionOn = 0;
-        #endif 
-        
-        DEBUG_PRINT("threadGetAndSendPositionMarvelmind: x=%d, y=%d\n", positionTemp->x, positionTemp->y);
 
-        encodePosition(buffer, positionTemp); // Faire renvoyer un la taille
-        size = strlen(buffer);
+
+    } else {
+        sleep(1);
+        position->x = 1000 + rand() % 1000;
+        position->y = 1000 + rand() % 1000;
+    }    
+}
+
+int encodePosition(char buffer[20], const Position position){
+    sprintf(buffer, "p:%d,%d;", position->x, position->y);
+    return strlen(buffer);
+}
+
+
+#ifndef TEST_MM
+
+void *threadGetAndSendPositionMarvelmind(void *arg){
+    Position position = malloc(sizeof(struct Position));
+    int size = -1;
+    char buffer[20];
+
+    while (getPostionOn)
+    {           
+        getPositionMarvelmind(robotMarvelmind, position);
+        DEBUG_PRINT("threadGetAndSendPositionMarvelmind: x=%d, y=%d\n", position->x, position->y);
+
+        size = encodePosition(buffer, position);
         DEBUG_PRINT("threadGetAndSendPositionMarvelmind: sentBuffer=%s\n", buffer);
         
-
-        #ifdef PI
-        pthread_mutex_lock(&mutexSerialPort);
-        writeSerial(portArduino, buffer, size);
-        pthread_mutex_unlock(&mutexSerialPort);
-
-        #endif
+        // Ecriture serie
+        if (raspiOn){
+            pthread_mutex_lock(&mutexSerialPort);   
+            writeSerial(portArduino, buffer, size); 
+            pthread_mutex_unlock(&mutexSerialPort); 
+        }
         
         // Ecriture reseau
         CHECK(sendToServer(sd, id, buffer, size), "threadGetAndSendPositionMarvelmind: sendToServer failed");
-        
-        
-        #ifdef PC
-        sleep(1); // Pas surd eca
-        #endif
     }
 
     DEBUG_PRINT("threadGetAndSendPositionMarvelmind: End of thread\n");
-    free(positionTemp);
+    free(position);
     
     return NULL;
 }
 
-void encodePosition(char buffer[20], Position positionTemp)
-{
-    sprintf(buffer, "p:%d,%d;", positionTemp->x, positionTemp->y);
-}
+
+
 
 #endif
-
 
 
 
