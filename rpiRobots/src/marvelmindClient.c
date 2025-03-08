@@ -10,7 +10,7 @@
 #include <string.h>
 
 #include <utils.h>
-#include <reseauClient.h>
+#include <networkClient.h>
 #include <serial.h>
 #include <main.h>
 
@@ -18,7 +18,7 @@ struct timespec tsMM;
 int addressMM = 0;
 
 RobotMarvelmind robotMarvelmind = NULL;
-int getPostionON = 1;
+int getPositionON = 1;
 
 bool terminateProgram=false;
 
@@ -100,7 +100,7 @@ void getPositionMarvelmind(RobotMarvelmind robotMarvelmind, Position position){
                 }
             }
         } 
-        else getPostionON = 0;
+        else getPositionON = 0;
 
 
     } else {
@@ -123,7 +123,7 @@ void *threadGetAndSendPositionMarvelmind(void *arg){
     int size = -1;
     char buffer[20];
 
-    while (getPostionON)
+    while (getPositionON)
     {           
         getPositionMarvelmind(robotMarvelmind, position);
         DEBUG_PRINT("threadGetAndSendPositionMarvelmind: x=%d, y=%d\n", position->x, position->y);
@@ -139,7 +139,10 @@ void *threadGetAndSendPositionMarvelmind(void *arg){
         }
         
         // Network write
-        CHECK(sendToServer(sd, id, buffer, size), "threadGetAndSendPositionMarvelmind: sendToServer failed");
+        if (sendToServer(sd, id, buffer, size) < 0){
+            perror("threadGetAndSendPositionMarvelmind: sendToServer failed");
+            getPositionON = 0;
+        }
     }
 
     DEBUG_PRINT("threadGetAndSendPositionMarvelmind: End of thread\n");

@@ -7,6 +7,7 @@ LIBS=-lpthread
 
 ifeq ($(D), 1)
 	CFLAGS +=-DDEBUG
+	CFLAGS +=-g
 endif
 
 
@@ -16,23 +17,23 @@ all: bin/main
 #		   MAIN			  #
 ###########################
 
-bin/main: bin/main.o bin/serial.o bin/marvelmind.o bin/marvelmindClient.o bin/reseauClient.o
-	gcc -g $(CFLAGS) $^ -o $@ $(LIBS) -ljansson
+bin/main: bin/main.o bin/serial.o bin/marvelmind.o bin/marvelmindClient.o bin/networkClient.o
+	gcc  $(CFLAGS) $^ -o $@ $(LIBS) -ljansson
 
 bin/serial.o: src/serial.c
-	gcc -g $(CFLAGS) -c $^ -o $@ $(LIBS)
+	gcc  $(CFLAGS) -c $^ -o $@ $(LIBS)
 
 bin/marvelmind.o: src/marvelmind.c
-	gcc -g $(CFLAGS) -c $^ -o $@ $(LIBS)
+	gcc  $(CFLAGS) -c $^ -o $@ $(LIBS)
 
 bin/marvelmindClient.o: src/marvelmindClient.c
-	gcc -g $(CFLAGS) -c $^ -o $@ $(LIBS)
+	gcc  $(CFLAGS) -c $^ -o $@ $(LIBS)
 
-bin/reseauClient.o: src/reseauClient.c
-	gcc -g $(CFLAGS) -c $^ -o $@ $(LIBS)
+bin/networkClient.o: src/networkClient.c
+	gcc  $(CFLAGS) -c $^ -o $@ $(LIBS)
 
 bin/main.o: src/main.c
-	gcc -g $(CFLAGS) -c $^ -o $@ $(LIBS) -ljansson
+	gcc  $(CFLAGS) -c $^ -o $@ $(LIBS) -ljansson
 
 ###########################
 #		   SERIAL		  #
@@ -60,7 +61,7 @@ bin/marvelmindClientTEST: src/marvelmind.c  src/marvelmindClient.c
 #		 RESEAU			  #
 ###########################
 
-bin/reseauClient: src/reseauClient.c
+bin/networkClient: src/networkClient.c
 	gcc $(CFLAGS) $^ -o $@ $(LIBS)
 
 

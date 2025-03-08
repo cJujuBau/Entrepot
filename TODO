@@ -1,6 +1,8 @@
-- [ ] Serveur pouvoir avoir plusieurs connextions uen par thread je pense
-- [ ] Thread pour lire le port serie arduino 
-- [ ] Gerer si on recoit qqch sur le port serie comme la detection d'un objet
+- [x] Serveur pouvoir avoir plusieurs connexions 
+- [x] Thread pour lire le port série Arduino 
+- [x] Gérer si on reçoit quelque chose  sur le port série comme la detection d'un objet
 
-Virer les ifdef pour des if normaux avec des variables gloabaux bien definis 
-VIrer le francais
+- [x] Supprimer les #ifdef pour des if normaux avec des variables globales bien définies
+- [x] Supprimer le francais
+
+- [ ] Mapper la zone sur x,y avec le marvelmind

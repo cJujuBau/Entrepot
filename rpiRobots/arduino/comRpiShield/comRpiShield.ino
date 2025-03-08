@@ -89,8 +89,10 @@ void getPosRef() {
       oRef = atoi(strPos); // Dernière valeur (oRef)
       break;
     }
+    else if (recu == ':') index = 0;
     else if (recu == ',') {
       strPos[index] = '\0'; // Terminer la chaîne
+      
       if (step == 0) xRef = atoi(strPos);
       else if (step == 1) yRef = atoi(strPos);
       

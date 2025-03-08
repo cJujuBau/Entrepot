@@ -1,70 +1,55 @@
 /* ------------------------------------------------------------------------ */
-/*                 Entrepot - Robots - marvelmindClient.h                   */
+/*                       Entrepot - Robots - reseau.h                       */
 /*                        Author: CHEVALIER Romain                          */
 /*                            Date: 26-10-2024                              */
 /* ------------------------------------------------------------------------ */
 
-#ifndef __MARVELMIND_CLIENT_H
-#define __MARVELMIND_CLIENT_H 1
+
+#ifndef __networkClient_H
+#define __networkClient_H 1
 
 /* ------------------------------------------------------------------------ */
 /*                        S T A N D A R D   H E A D E R S                   */
 /* ------------------------------------------------------------------------ */
 
 #include <utils.h>
-#include <marvelmind.h>
-
-#include <semaphore.h>
-#include <time.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 /* ------------------------------------------------------------------------ */
-/*                      S Y M B O L I C   C O N S T A N T S                 */
+/*                   S Y M B O L I C   C O N S T A N T S                    */
 /* ------------------------------------------------------------------------ */
 
-#define MAX_COORD 50000
-#define MIN_COORD -50000
+
+#define PORT 3000
 
 /* ------------------------------------------------------------------------ */
 /*                        T Y P E   D E F I N I T I O N S                   */
 /* ------------------------------------------------------------------------ */
 
-typedef struct RobotMarvelmind{
-    struct MarvelmindHedge * hedge;
-    int address;
-    
-} *RobotMarvelmind;
 
-typedef struct Position{
-    int32_t x, y;
-    int32_t angle;
-} *Position;
 
 
 
 /* ------------------------------------------------------------------------ */
-/*                       G L O B A L   V A R I A B L E S                    */
-/* ------------------------------------------------------------------------ */
-static sem_t *semMM;
-extern struct timespec tsMM;
-
-
-extern int addressMM;
-
-extern RobotMarvelmind robotMarvelmind;
-extern int getPositionON;
-
-/* ------------------------------------------------------------------------ */
-/*                      F U N C T I O N   P R O T O T Y P E S               */
+/*                    F U N C T I O N   P R O T O T Y P E S                 */
 /* ------------------------------------------------------------------------ */
 
+void initnetworkClient(int *sd, const char *ipServer);
+int sendToServer(int sd, const int id, const char *msg, const int size);
+int closeNetworkClient(int sd);
 
-void initRobotMarvelmind(RobotMarvelmind robotMarvelmind, const char* ttyFileName, const int address);
-void destroyRobotMarvelmind(RobotMarvelmind robotMarvelmind);
-void getPositionMarvelmind(RobotMarvelmind robotMarvelmind, Position position);
-void printPositionMarvelmindRobot(RobotMarvelmind robotMarvelmind);
+void *threadReceptionReseau(void *arg);
+void sendObstacleDetected(const char *buffer, int size);
 
-void *threadGetAndSendPositionMarvelmind(void *arg);
 
-int encodePosition(char buffer[20], const Position position);
+/* ------------------------------------------------------------------------ */
+/*                        G L O B A L   V A R I A B L E S                   */
+/* ------------------------------------------------------------------------ */
+
+extern int sd;
+extern int networkReceptionON;
+
 
 #endif

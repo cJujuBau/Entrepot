@@ -1,36 +1,56 @@
 
 CFLAGS= -Wall
 CFLAGS+=-I./include
-CSTFLAGS =-DDEBUG 
 
 
 LIBS=-lpthread
 
-ifeq ($(PC), 1)
-	CFLAGS +=-DPC
+ifeq ($(D), 1)
 	CFLAGS +=-DDEBUG
+	CFLAGS +=-g
 endif
 
+all: bin/main
 
 
 ###########################
 #		   MAIN			  #
 ###########################
 
+bin/main: bin/main.o bin/server.o bin/order.o
+	gcc $(CFLAGS) $^ -o $@ $(LIBS)
+
+bin/main.o: src/main.c
+	gcc $(CFLAGS) -c $^ -o $@ $(LIBS)
 
 
 
 ###########################
-#		   SERVEUR		  #
+#		   SERVER		  #
 ###########################
 
-bin/serveur: src/serveur.c
-	gcc -g $(CFLAGS) $^ -o $@ $(LIBS)
+bin/server: src/server.c
+	gcc $(CFLAGS) $^ -o $@ $(LIBS)
+
+bin/server.o: src/server.c
+	gcc $(CFLAGS) -c $^ -o $@ $(LIBS)
 
 
 
+###########################
+#	 INVENTORY MANAGER	  #
+###########################
+
+bin/inventoryManager: src/inventoryManager.cpp
+	g++  $(CFLAGS) $^ -o $@ -lncurses 
 
 
+###########################
+#      	   ORDER		  #
+###########################
+
+bin/order.o: src/order.c
+	gcc $(CFLAGS) -c $^ -o $@ $(LIBS)
 
 ###########################
 #		 CLEAN			  #

@@ -6,8 +6,8 @@ LOCAL_INCLUDE_DIR="./include"
 LOCAL_MAKEFILE="./makefile"
 LOCAL_PARAM_FILE="./param.json"
 REMOTE_USER="pi"
-REMOTE_HOST="172.20.10.2"
-#REMOTE_HOST="192.168.1.24"  # Remplacez par l'adresse IP de votre Raspberry Pi
+#REMOTE_HOST="172.20.10.2"
+REMOTE_HOST="192.168.1.24"  # Remplacez par l'adresse IP de votre Raspberry Pi
 REMOTE_DIR="/home/pi/entrepot"
 
 # Copier le Makefile
@@ -20,7 +20,7 @@ rsync -avz --info=stats0 --update "$LOCAL_SRC_DIR/" "$REMOTE_USER@$REMOTE_HOST:$
 rsync -avz --info=stats0 --update "$LOCAL_INCLUDE_DIR/" "$REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/include/"
 
 # Copier le fichier param.json
-rsync -avz --info=stats0 --update "$LOCAL_PARAM_FILE" "$REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/"
+# rsync -avz --info=stats0 --update "$LOCAL_PARAM_FILE" "$REMOTE_USER@$REMOTE_HOST:$REMOTE_DIR/"
 
 
 

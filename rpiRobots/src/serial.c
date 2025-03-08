@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include <serial.h>
-#include <reseauClient.h>
+#include <networkClient.h>
 
 # define CRTSCTS 020000000000 /* Flow control.  for VsCode*/
 

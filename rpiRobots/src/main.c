@@ -17,7 +17,7 @@
 #include <serial.h>
 #include <main.h>
 #include <marvelmindClient.h>
-#include <reseauClient.h>
+#include <networkClient.h>
 #include <jansson.h>
 
 
@@ -51,7 +51,7 @@ static void signalHandler(int numSig){
     switch(numSig) {
         case SIGINT : // handling SIGINT
             printf("\n\t[%d] --> Program interruption in progress...\n", getpid());
-            getPostionON = 0;
+            getPositionON = 0;
             networkReceptionON = 0;
             serialReceptionON = 0;
             exit(EXIT_SUCCESS);
@@ -91,10 +91,9 @@ int main(int argc, char const *argv[])
 
 
     // Initialization of the execution mode
-    if(argc > 2){
-        if(argv[1][0] == '0') marvelmindOn = 0;
-        if(argv[2][0] == '0') raspiOn = 0;
-    }
+    if(argc > 1 && argv[1][0] == '0') marvelmindOn = 0;
+    if(argc > 2 && argv[2][0] == '0') raspiOn = 0;
+    
 
     DEBUG_PRINT("Execution mode: marvelmindOn=%d, raspiOn=%d\n", marvelmindOn, raspiOn);
 
@@ -133,7 +132,7 @@ int main(int argc, char const *argv[])
 
     // Initialization of the network
     DEBUG_PRINT("Initialization of the network on IP: %s\n", ipServer);
-    initReseauClient(&sd, ipServer);
+    initnetworkClient(&sd, ipServer);
     
     // Creation of threads
     DEBUG_PRINT("Creation of threads\n");
