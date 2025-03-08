@@ -7,24 +7,24 @@
 #include <reseauClient.h>
 
 int sd =-1;
-int receptionReseauEnCours = 1;
+int networkReceptionON = 1;
 extern int id;
 
-void initReseauClient(int *sd, const char *ipServeur){
+void initReseauClient(int *sd, const char *ipServer){
     
     struct sockaddr_in addrServ;
 
-    //Etape 1 - Creation de la socket
+    // Step 1 - Create the socket
     CHECK(*sd = socket(AF_INET, SOCK_STREAM, 0) ,"initReseauClient: socket(AF_INET, SOCK_STREAM, 0)");
 
-    //Etape2 - Adressage du destinataire
+    // Step 2 - Addressing the recipient
 
     addrServ.sin_family=AF_INET;
     addrServ.sin_port=htons(PORT);
-    addrServ.sin_addr.s_addr=inet_addr(ipServeur);
+    addrServ.sin_addr.s_addr=inet_addr(ipServer);
     
 
-    //Etape 3 - demande d'ouverture de connexion
+    // Step 3 - Request to open a connection
     CHECK(connect(*sd, (const struct sockaddr *)&addrServ, sizeof(struct sockaddr_in)), "initReseauClient: connect(sd)");
 
 }
@@ -42,7 +42,7 @@ int sendToServer(int sd, const int id, const char *msg, const int size){
     return nbChar-NewSize;
 }
 
-int closeReseauClient(int sd){
+int closeNetworkClient(int sd){
     return close(sd);
 }
 
@@ -57,7 +57,7 @@ void sendObstacleDetected(const char *buffer, int size){
 void *threadReceptionReseau(void *arg){
     char buffer[100];
     int nbChar;
-    while (receptionReseauEnCours)
+    while (networkReceptionON)
     {
         nbChar = recv(sd, buffer, 100, 0);
         if (nbChar > 0)
@@ -75,7 +75,7 @@ void *threadReceptionReseau(void *arg){
 
 /* 
 
-// Exemple d'utilisation :
+// Example of usage:
 
 int main(int argc, char const *argv[])
 {
@@ -86,7 +86,7 @@ int main(int argc, char const *argv[])
 
 
 
-    closeReseauClient(sd);
+    closeNetworkClient(sd);
     return 0;
 }
 

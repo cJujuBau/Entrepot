@@ -1,6 +1,3 @@
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -9,15 +6,13 @@
 #include <serial.h>
 #include <reseauClient.h>
 
-# define CRTSCTS 020000000000 /* Flow control.  */
-
+# define CRTSCTS 020000000000 /* Flow control.  for VsCode*/
 
 #define FIRST_CHAR_HUMAN_READABLE 32
 
-int portArduino = -1;                      // Définition unique
+int portArduino = -1;                     
 pthread_mutex_t mutexSerialPort = PTHREAD_MUTEX_INITIALIZER;
-int receptionSerieEnCours = 1;
-
+int serialReceptionON = 1;
 
 int openSerialPort(const char* portStr) {
     int port;
@@ -45,11 +40,10 @@ void setSerialPort(int port){
     options.c_cflag &= ~CRTSCTS;
     options.c_iflag &= ~(IXON | IXOFF | IXANY);
 
-    // Configurer VMIN et VTIME pour un délai après le premier caractère
-    options.c_cc[VMIN] = 1;  // Ne pas attendre un nombre minimum de caractères
-    options.c_cc[VTIME] = 10; // Attendre jusqu'à 1 secondes après le premier caractère
+    // Configure VMIN and VTIME for a delay after the first character
+    options.c_cc[VMIN] = 1;  // Wait for at least 1 character
+    options.c_cc[VTIME] = 10; // Wait up to 1 second after the first character
 
-    
     CHECK(tcsetattr(port, TCSANOW, &options), "msg: Unable to set serial port");
 }
 
@@ -62,29 +56,28 @@ void writeSerial(int port, const char* data, const int size){
 }
 
 int readSerial(int port, char* buffer, int size){
-    char single_char;
+    char singleChar;
     int index = 0;
     int reception = 0;
     char buffTemp[size];
 
     while (1)
     {
-        reception = read(port, &single_char, 1); // Lire 1 caractère
+        reception = read(port, &singleChar, 1); // Read 1 character
         if (reception > 0)
         {
-            // DEBUG_PRINT("readSerial : Caractere recu : %c et %d\n", single_char, single_char);
-            if (single_char >= FIRST_CHAR_HUMAN_READABLE ) buffTemp[index++] = single_char;
-            if (single_char == '\n' || index > size) break;
-
+            // DEBUG_PRINT("readSerial : Character received : %c and %d\n", singleChar, singleChar);
+            if (singleChar >= FIRST_CHAR_HUMAN_READABLE ) buffTemp[index++] = singleChar;
+            if (singleChar == '\n' || index > size) break;
         }
         else if (reception == -1)
         {
-            perror("Erreur lecture port serie");
+            perror("Error reading serial port");
             return -1;
         }
     }
 
-    // Terminer la chaîne de caractères
+    // Terminate the string
     // DEBUG_PRINT("readSerial: index=%d, buffer=%s\n", index, buffer);
 
     if (index > 0) {
@@ -92,22 +85,18 @@ int readSerial(int port, char* buffer, int size){
         strcpy(buffer, buffTemp);
     }
 
-    // Afficher le message reçu
-    // if (index > 0) DEBUG_PRINT("Message reçu : %s\n", buffer);
-    // else printf("Aucune donnee recue.\n");
-
-    // DEBUG_PRINT("Reception finie.\n");
     return index;
 }
+
 void *threadReceptionSerie(void *arg){
     char buffer[100];
     int nbChar = 0;
-    while (receptionSerieEnCours)
+    while (serialReceptionON)
     {
-        nbChar = readSerial(portArduino, buffer, 100); // Voir si ca ne bloque pas le port serie et mettre la mutex
+        nbChar = readSerial(portArduino, buffer, 100);
         // DEBUG_PRINT("threadReceptionSerie: buffer=%s, nbCharRecu=%d\n", buffer, nbChar);
-        if (nbChar > 0)
-        {
+
+        if (nbChar > 0){
             DEBUG_PRINT("threadReceptionSerie: buffer=%s\n", buffer);
             if (buffer[0] == 'o') sendObstacleDetected(buffer, nbChar);
         }
@@ -116,18 +105,13 @@ void *threadReceptionSerie(void *arg){
     return NULL;
 }
 
-
 void closeSerialPort(int port){
     CHECK(close(port), "msg: Unable to close serial port");
 }
 
-
-
-
 #ifdef TEST_SERIAL
 
-
-// Exemple d'utilisation :
+// Example usage:
 #define PORT_ARDUINO "/dev/ttyS0"
 
 int main(int argc, char const *argv[])
@@ -138,8 +122,6 @@ int main(int argc, char const *argv[])
     // char buffer[100];
     // readSerial(port, buffer, 100);
     closeSerialPort(port);  
-
-    
 
     return 0;
 }

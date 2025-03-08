@@ -18,7 +18,7 @@ struct timespec tsMM;
 int addressMM = 0;
 
 RobotMarvelmind robotMarvelmind = NULL;
-int getPostionOn = 1;
+int getPostionON = 1;
 
 bool terminateProgram=false;
 
@@ -33,7 +33,7 @@ void CtrlHandler(int signum)
 
 void semCallback()
 {
-	sem_post(semMM);
+    sem_post(semMM);
 }
 
 void initRobotMarvelmind(RobotMarvelmind robotMarvelmind, const char* ttyFileName, const int address){
@@ -61,10 +61,10 @@ void initRobotMarvelmind(RobotMarvelmind robotMarvelmind, const char* ttyFileNam
 }
 
 void destroyRobotMarvelmind(RobotMarvelmind robotMarvelmind){
-    #ifndef PC
-    stopMarvelmindHedge(robotMarvelmind->hedge);
-    destroyMarvelmindHedge(robotMarvelmind->hedge);
-    #endif
+    if (marvelmindOn){
+        stopMarvelmindHedge(robotMarvelmind->hedge);
+        destroyMarvelmindHedge(robotMarvelmind->hedge);
+    }
 
     free(robotMarvelmind);
 
@@ -73,7 +73,7 @@ void destroyRobotMarvelmind(RobotMarvelmind robotMarvelmind){
 }
 
 
-// A TESTER
+// TO TEST
 void getPositionMarvelmind(RobotMarvelmind robotMarvelmind, Position position){
     struct MarvelmindHedge * hedge = robotMarvelmind->hedge;
     struct PositionValue positionMM;
@@ -85,7 +85,7 @@ void getPositionMarvelmind(RobotMarvelmind robotMarvelmind, Position position){
                 exit(EXIT_FAILURE);
             }
 
-            tsMM.tv_sec += 2; // Voir si on peut pas virer ca 
+            tsMM.tv_sec += 2; // See if we can remove this
             sem_timedwait(semMM,&tsMM);
 
 
@@ -100,7 +100,7 @@ void getPositionMarvelmind(RobotMarvelmind robotMarvelmind, Position position){
                 }
             }
         } 
-        else getPostionOn = 0;
+        else getPostionON = 0;
 
 
     } else {
@@ -123,7 +123,7 @@ void *threadGetAndSendPositionMarvelmind(void *arg){
     int size = -1;
     char buffer[20];
 
-    while (getPostionOn)
+    while (getPostionON)
     {           
         getPositionMarvelmind(robotMarvelmind, position);
         DEBUG_PRINT("threadGetAndSendPositionMarvelmind: x=%d, y=%d\n", position->x, position->y);
@@ -131,14 +131,14 @@ void *threadGetAndSendPositionMarvelmind(void *arg){
         size = encodePosition(buffer, position);
         DEBUG_PRINT("threadGetAndSendPositionMarvelmind: sentBuffer=%s\n", buffer);
         
-        // Ecriture serie
+        // Serial write
         if (raspiOn){
             pthread_mutex_lock(&mutexSerialPort);   
             writeSerial(portArduino, buffer, size); 
             pthread_mutex_unlock(&mutexSerialPort); 
         }
         
-        // Ecriture reseau
+        // Network write
         CHECK(sendToServer(sd, id, buffer, size), "threadGetAndSendPositionMarvelmind: sendToServer failed");
     }
 
@@ -175,7 +175,7 @@ void *threadGetAndSendPositionMarvelmind(void *arg){
 
 #ifdef TEST_MM
 
-// A supprimer comme fonction
+// To be removed as function
 void printPositionMarvelmindRobot(RobotMarvelmind robotMarvelmind){
     Position position = malloc(sizeof(struct Position));
     position->x = 0;
@@ -190,7 +190,7 @@ void printPositionMarvelmindRobot(RobotMarvelmind robotMarvelmind){
                 printf("clock_gettime error");
                 exit(EXIT_FAILURE);
             }
-        tsMM.tv_sec += 2; // Voir si on peut pas virer ca 
+        tsMM.tv_sec += 2; // See if we can remove this
         sem_timedwait(semMM,&tsMM);
 
         getPositionMarvelmind(robotMarvelmind, position);
@@ -205,7 +205,7 @@ void printPositionMarvelmindRobot(RobotMarvelmind robotMarvelmind){
 #define PORT_MARVELMIND "/dev/ttyACM0"
 #define ADDRESS_MM      12
 RobotMarvelmind robotMarvelmind;
-// Bien verifier que le marvelmind soit defini en 115200 en baudrate, sinon voir sur le dashboard dans interface
+// Make sure the marvelmind is set to 115200 baudrate, otherwise check on the dashboard in interface
 
 int main (int argc, char *argv[])
 {
@@ -228,3 +228,4 @@ int main (int argc, char *argv[])
 }
 
 #endif
+

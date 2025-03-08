@@ -1,3 +1,13 @@
+/* ------------------------------------------------------------------------ */
+/*                       Entrepot - Robots - mainc.c                        */
+/*                        Author: CHEVALIER Romain                          */
+/*                            Date: 26-10-2024                              */
+/* ------------------------------------------------------------------------ */
+
+/* ------------------------------------------------------------------------ */
+/*                        S T A N D A R D   H E A D E R S                   */
+/* ------------------------------------------------------------------------ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -11,11 +21,19 @@
 #include <jansson.h>
 
 
+/* ------------------------------------------------------------------------ */
+/*                        G L O B A L   V A R I A B L E S                   */
+/* ------------------------------------------------------------------------ */
+
 int id = -1;
-char ipServeur[16];
+char ipServer[16];
 
 int raspiOn = 1;
 int marvelmindOn = 1; 
+
+/* ------------------------------------------------------------------------ */
+/*                    F U N C T I O N   D E F I N I T I O N                 */
+/* ------------------------------------------------------------------------ */
 
 void initParam(){
     json_t *root;
@@ -23,31 +41,30 @@ void initParam(){
     CHECK_NULL(root = json_load_file(PATH_PARAM, 0, &error), "initParam: json_load_file(PATH_PARAM)");
     id = json_integer_value(json_object_get(root, "id"));
     addressMM = json_integer_value(json_object_get(root, "addressMM"));
-    if (raspiOn) strcpy(ipServeur, json_string_value(json_object_get(root, "ipServeur")));
-    else strcpy(ipServeur, "127.0.0.1");
+    if (raspiOn) strcpy(ipServer, json_string_value(json_object_get(root, "ipServer")));
+    else strcpy(ipServer, "127.0.0.1");
     json_decref(root);
 }
 
 
-static void signalHandler(int numSig)
-{ 
+static void signalHandler(int numSig){ 
     switch(numSig) {
-        case SIGINT : // traitement de SIGINT
-            printf("\n\t[%d] --> Interruption du programme en cours...\n", getpid());
-            getPostionOn = 0;
-            receptionReseauEnCours = 0;
-            receptionSerieEnCours = 0;
+        case SIGINT : // handling SIGINT
+            printf("\n\t[%d] --> Program interruption in progress...\n", getpid());
+            getPostionON = 0;
+            networkReceptionON = 0;
+            serialReceptionON = 0;
             exit(EXIT_SUCCESS);
-			break;
+            break;
         default :
-            printf (" Signal %d non traité \n", numSig );
+            printf (" Signal %d not handled \n", numSig);
             break ;
     }
 }
 
 void bye(){
     
-    closeReseauClient(sd);
+    closeNetworkClient(sd);
     destroyRobotMarvelmind(robotMarvelmind);
 
     
@@ -57,32 +74,37 @@ void bye(){
     }
 
     
-    printf("Fin du programme\n");
+    printf("End of program\n");
 
 }
 
 int main(int argc, char const *argv[])
 {
-    DEBUG_PRINT("Debut du programme\n");
+    // Variables
+    pthread_t threadMarvelmind,  threadReadReseau, threadReadArduino;
 
-    // Installation du gestionnaire de fin de programme
+
+    DEBUG_PRINT("Start of program\n");
+
+    // Installation of the program end handler
     atexit(bye);
 
-    // Initialisation du mode d'exécution
 
+    // Initialization of the execution mode
     if(argc > 2){
         if(argv[1][0] == '0') marvelmindOn = 0;
         if(argv[2][0] == '0') raspiOn = 0;
     }
 
-    DEBUG_PRINT("Mode d'execution : marvelmindOn=%d, raspiOn=%d\n", marvelmindOn, raspiOn);
+    DEBUG_PRINT("Execution mode: marvelmindOn=%d, raspiOn=%d\n", marvelmindOn, raspiOn);
 
-    // Initialisation des parametres
+
+    // Initialization of parameters
     initParam();
 
     
-    // Installation du gestionnaire de signaux pour géré le ctrl c et la fin d'un fils.
-    DEBUG_PRINT("Initialisation du gestionnaire de signaux\n");
+    // Installation of the signal handler to manage CTRL-C end
+    DEBUG_PRINT("Initialization of the signal handler\n");
     struct sigaction newAction;
     newAction.sa_handler = signalHandler;
     CHECK(sigemptyset(&newAction.sa_mask ), " sigemptyset ()");
@@ -90,45 +112,38 @@ int main(int argc, char const *argv[])
     CHECK(sigaction(SIGINT, &newAction, NULL), "sigaction (SIGINT)");
 
     
-    // Initialisation du port serie pour l'arduino
+    // Initialization of the serial port for the Arduino
     if (raspiOn){
         
-        DEBUG_PRINT("Ouverture du port serie pour l'arduino\n");
-        
+        DEBUG_PRINT("Opening the serial port for the Arduino\n");
         CHECK(portArduino = openSerialPort(PORT_ARDUINO), "main: openSerialPort(PORT_ARDUINO)");
         setSerialPort(portArduino);
 
-        DEBUG_PRINT("Initialisation de la mutex pour le port serie\n");
+        DEBUG_PRINT("Initialization of the mutex for the serial port\n");
         CHECK_T(pthread_mutex_init(&mutexSerialPort, NULL), "main: pthread_mutex_init(&mutexSerialPort, NULL)");
     }
     
-    // Initialisation du marvelmind
 
-    DEBUG_PRINT("Initialisation du marvelmind\n");
+    // Initialization of the marvelmind
+    DEBUG_PRINT("Initialization of the marvelmind\n");
     CHECK_NULL(semMM = malloc(sizeof(sem_t)), "main: malloc(sizeof(sem_t))");
     robotMarvelmind = malloc(sizeof(struct RobotMarvelmind));
     initRobotMarvelmind(robotMarvelmind, PORT_MARVELMIND, addressMM);
 
 
+    // Initialization of the network
+    DEBUG_PRINT("Initialization of the network on IP: %s\n", ipServer);
+    initReseauClient(&sd, ipServer);
     
-
-
-    // Initialisation du reseau
-    DEBUG_PRINT("Initialisation du reseau sur l'IP : %s\n", ipServeur);
-    initReseauClient(&sd, ipServeur);
-    
-    // Creation des threads
-    pthread_t threadMarvelmind,  threadReadReseau, threadReadArduino;
-
-    DEBUG_PRINT("Creation des threads\n");
+    // Creation of threads
+    DEBUG_PRINT("Creation of threads\n");
     CHECK_T(pthread_create(&threadMarvelmind, NULL, threadGetAndSendPositionMarvelmind, NULL), "main: pthread_create(&threadMarvelmind)");
     CHECK_T(pthread_create(&threadReadReseau, NULL, threadReceptionReseau, NULL), "main: pthread_create(&threadReadReseau)");
 
     if (raspiOn) CHECK_T(pthread_create(&threadReadArduino, NULL, threadReceptionSerie, NULL), "main: pthread_create(&threadReadArduino)");
 
     
-    // Attente de la fin des threads 
-    
+    // Waiting for the end of threads 
     pthread_join(threadMarvelmind, NULL);
     pthread_join(threadReadReseau, NULL);
     if (raspiOn) pthread_join(threadReadArduino, NULL);
