@@ -1,4 +1,4 @@
-#include "include/MotorController.h"
+#include "../include/MotorController.h"
 
 MotorController::MotorController(double Km, double Ki) : Km(Km), Ki(Ki), controlledVoltage(0) {}
 

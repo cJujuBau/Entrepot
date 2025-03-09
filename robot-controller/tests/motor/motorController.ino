@@ -3,10 +3,10 @@
 #include "include/Utils.h"
 
 const double SPEED = 100.0; // mm.s-1
-const double ROT_SPEED = PI/4; // rad.s-1
+const double ROT_SPEED = PI/4.; // rad.s-1
 
-const double Km = 1/50;
-const double Ki = 0;
+const double Km = 1./50.;
+const double Ki = 0.;
 
 Motor motorLeft(34, 35, 12, 18, 31, FORWARD);
 Motor motorRight(37, 36, 8, 19, 38, BACKWARD);
@@ -35,57 +35,54 @@ void loop() {
   while (millis() - timePrec < DT) {}
   timePrec = millis();
 
-  //robot.motorControllerLeft.updateOutput(robot.motorLeft);
-  //robot.motorControllerRight.updateOutput(robot.motorRight);
-
-
   static unsigned long startTime = millis();
   unsigned long currentTime = millis();
   unsigned long elapsedTime = currentTime - startTime;
 
   if (elapsedTime <= 3000) {
-    (forwardOnce++ > 0) ? : Serial.println("Forward");
     motorControllerLeft.setControlledVoltage(SPEED);
     motorControllerRight.setControlledVoltage(SPEED);
-
-    motorRight.setVoltage(motorControllerLeft.getControlledVoltage());
+    if (forwardOnce++ == 0){
+      Serial.println("Forward");
+      Serial.println(motorControllerLeft.getControlledVoltage());
+      Serial.println(motorControllerRight.getControlledVoltage());
+    } 
     motorLeft.setVoltage(motorControllerLeft.getControlledVoltage());
+    motorRight.setVoltage(motorControllerRight.getControlledVoltage());
+
   } else if (elapsedTime <= 6000) {
-    (rightOnce++ > 0) ? : Serial.println("Rotate Right");
     motorControllerLeft.setControlledVoltage(-SPEED);
     motorControllerRight.setControlledVoltage(SPEED);
-
-    motorRight.setVoltage(motorControllerLeft.getControlledVoltage());
+    if (rightOnce++ == 0){
+      Serial.println("Rotate Right");
+      Serial.println(motorControllerLeft.getControlledVoltage());
+      Serial.println(motorControllerRight.getControlledVoltage());
+    } 
     motorLeft.setVoltage(motorControllerLeft.getControlledVoltage());
+    motorRight.setVoltage(motorControllerRight.getControlledVoltage());
+
   } else if (elapsedTime <= 9000) {
     (leftOnce++ > 0) ? : Serial.println("Rotate Left");
     motorControllerLeft.setControlledVoltage(SPEED);
     motorControllerRight.setControlledVoltage(-SPEED);
-
-    motorRight.setVoltage(motorControllerLeft.getControlledVoltage());
     motorLeft.setVoltage(motorControllerLeft.getControlledVoltage());
+    motorRight.setVoltage(motorControllerRight.getControlledVoltage());
+
   } else if (elapsedTime <= 12000) {
     (backwardOnce++ > 0) ? : Serial.println("Backward");
     motorControllerLeft.setControlledVoltage(-SPEED);
     motorControllerRight.setControlledVoltage(-SPEED);
-
-    motorRight.setVoltage(motorControllerLeft.getControlledVoltage());
     motorLeft.setVoltage(motorControllerLeft.getControlledVoltage());
+    motorRight.setVoltage(motorControllerRight.getControlledVoltage());
+
   } else if (elapsedTime <= 15000) {
     (stopOnce++ > 0) ? : Serial.println("Stop");
     motorControllerLeft.setControlledVoltage(0);
     motorControllerRight.setControlledVoltage(0);
-
-    motorRight.setVoltage(motorControllerLeft.getControlledVoltage());
     motorLeft.setVoltage(motorControllerLeft.getControlledVoltage());
+    motorRight.setVoltage(motorControllerRight.getControlledVoltage());
   }
 
   motorLeft.applyVoltage();
   motorRight.applyVoltage();
-
-  // // Update variables
-  // robot.updateState(); 
 }
-
-
-
