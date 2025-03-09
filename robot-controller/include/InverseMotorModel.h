@@ -5,17 +5,19 @@
 #include "Arduino.h"
 #include <math.h>
 
-
+// Réalise la conversion de 2 vitesses de référence x_ref_dot et y_ref_dot en 2 consignes de vitesse pour les moteurs
 class InverseMotorModel {
 public:
-    InverseMotorModel(Point initial_pos_ref, double Kx, double Ky) : pos_ref(initial_pos_ref), Kx(Kx), Ky(Ky) {}
+    InverseMotorModel(double Kx, double Ky);
 
-    void setReference(const Point new_pos_ref);
-    void update(MotorController &motorControllerLeft, MotorController &motorControllerRight, const double theta);
+    void setReference(const Point new_vel_ref);
+    void update(const double theta);
     
 
 private:
-    Point pos_ref;
+    Point vel_ref;
     double Kx;
     double Ky;
+    double Vd_star;
+    double Vg_star;
 };

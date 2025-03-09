@@ -1,11 +1,11 @@
-#include "../include/MotorController.h"
+#include "include/MotorController.h"
 
-MotorController::MotorController(double Km, double Ki, double ref) : Km(Km), Ki(Ki), ref(ref) {}
+MotorController::MotorController(double Km, double Ki) : Km(Km), Ki(Ki), controlledVoltage(0) {}
 
-void MotorController::setReference(const double ref) {
-    this->ref = ref;
+void MotorController::setControlledVoltage(const double refSpeed) {
+    this->controlledVoltage = refSpeed * Km; // pas encore d'intégrateur implémenté
 }
 
-void MotorController::updateOutput(Motor &motor) {
-    motor.setVoltage(this->ref / Km); // pas encore d'intégrateur implémenté
+double MotorController::getControlledVoltage() {
+    return controlledVoltage;
 }

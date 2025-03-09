@@ -1,8 +1,10 @@
 #include "../include/Robot.h"
 
-Robot::Robot(Point pos, Motor& motorLeft, Motor& motorRight, MotorController& motorControllerLeft, MotorController& motorControllerRight, InverseMotorModel& inverseMotorModel, double theta) 
+Robot::Robot(Point pos, Motor& motorLeft, Motor& motorRight, MotorController& motorControllerLeft, 
+             MotorController& motorControllerRight, InverseMotorModel& inverseMotorModel, double theta) 
 : pos(pos), motorLeft(motorLeft), motorRight(motorRight), theta(theta), v(0), w(0), 
-motorControllerLeft(motorControllerLeft), motorControllerRight(motorControllerRight), inverseMotorModel(inverseMotorModel) {}
+  motorControllerLeft(motorControllerLeft), motorControllerRight(motorControllerRight), 
+  inverseMotorModel(inverseMotorModel) {}
 
 void Robot::updateState(){
     double Vg = motorLeft.getSpeed();
