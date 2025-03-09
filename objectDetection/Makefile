@@ -7,16 +7,17 @@ ifeq ($(D), 1)
 endif
 
 LIBS= `pkg-config --cflags --libs opencv4`
+LIBS+= -lrealsense2
 
 
 
-all: bin/detection 
+all: bin/objectDetection 
 
 ###########################
 #		DETECTION		  #
 ###########################																
 
-bin/detection: src/detection.cpp src/ptz.c 
+bin/objectDetection: src/objectDetection.cpp 
 	g++ $(CFLAGS) $^ -o $@  $(LIBS)
 
 
