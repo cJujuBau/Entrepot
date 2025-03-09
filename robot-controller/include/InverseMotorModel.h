@@ -13,6 +13,8 @@ public:
     void setReference(const Point new_vel_ref);
     void update(const double theta);
     
+    double getVdStar();
+    double getVgStar();
 
 private:
     Point vel_ref;

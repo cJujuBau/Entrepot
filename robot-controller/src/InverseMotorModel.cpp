@@ -13,3 +13,11 @@ void InverseMotorModel::update(const double theta) {
     Vd_star = v_star + WIDTH * w_star;
     Vg_star = v_star - WIDTH * w_star;
 }
+
+double InverseMotorModel::getVdStar(){
+    return Vd_star;
+}
+
+double InverseMotorModel::getVgStar(){
+    return Vg_star;
+}

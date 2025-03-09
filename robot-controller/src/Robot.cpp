@@ -20,9 +20,28 @@ void Robot::updateState(){
     pos.y += DT * MS_TO_S * dy;
 }
 
+void Robot::changeRef(const double Vx, const double Vy){
+    inverseMotorModel.setReference(Point(Vx, Vy));
+    inverseMotorModel.update(theta);
+    motorControllerLeft.setControlledVoltage(inverseMotorModel.getVgStar());
+    motorControllerRight.setControlledVoltage(inverseMotorModel.getVdStar());
+    motorLeft.setVoltage(motorControllerLeft.getControlledVoltage());
+    motorRight.setVoltage(motorControllerRight.getControlledVoltage());
+    motorLeft.applyVoltage();
+    motorRight.applyVoltage();
+}
+
 void Robot::readMarvelmind(){
 }
 
 double Robot::getTheta(){
     return this->theta;
+}
+
+void Robot::init(){
+    motorLeft.init();
+    motorRight.init();
+  
+    attachInterrupt(digitalPinToInterrupt(motorLeft.getVA()), Motor::handleRisingEdge, RISING);
+    attachInterrupt(digitalPinToInterrupt(motorRight.getVA()), Motor::handleRisingEdge, RISING);
 }

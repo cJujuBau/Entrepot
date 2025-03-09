@@ -6,9 +6,13 @@
 
 class Robot {
 public:
-    Robot(Point pos, Motor& motorLeft, Motor& motorRight, MotorController& motorControllerLeft, MotorController& motorControllerRight, InverseMotorModel& inverseMotorModel, double theta);
+    Robot(Point pos, Motor& motorLeft, Motor& motorRight, 
+          MotorController& motorControllerLeft, MotorController& motorControllerRight, 
+          InverseMotorModel& inverseMotorModel, double theta);
     void updateState();
     void readMarvelmind();
+    void changeRef(const double Vx, const double Vy);
+    void init();
 
     double getTheta();
 
