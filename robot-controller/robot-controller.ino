@@ -1,14 +1,15 @@
-#include "src/InverseMotorModel.h"
-#include "src/MotorController.h"
-#include "src/Robot.h"
-#include "src/utils/Utils.h"
+#include "include/InverseMotorModel.h"
+#include "include/MotorController.h"
+#include "include/Motor.h"
+#include "include/Robot.h"
+#include "include/Utils.h"
 
-#define SPEED 100.0
-#define ROT_SPEED PI/4
+const double SPEED = 100.0;
+const double ROT_SPEED = PI/4;
 
-struct Point pos_depart = {0, 0};
-struct Point pos_ref = {250, 100};
-struct Point vel_ref = {0, 0};
+Point pos_depart = {0, 0};
+Point pos_ref = {250, 100};
+Point vel_ref = {0, 0};
 
 Motor motorLeft(34, 35, 12, 18, 31, FORWARD);
 Motor motorRight(37, 36, 8, 19, 38, BACKWARD);
@@ -44,21 +45,39 @@ void loop() {
   //robot.motorControllerRight.updateOutput(robot.motorRight);
   
   if (iteration == 10) {
-    Serial.println("+5v");
-    motorRight.setVoltage(-3);
-    motorLeft.setVoltage(3);
-  } else if (iteration == 1000) {
-    Serial.println("0 v");
-     motorRight.setVoltage(0);
-     motorLeft.setVoltage(0);
-  }
+    static unsigned long startTime = millis();
+    unsigned long currentTime = millis();
+    unsigned long elapsedTime = currentTime - startTime;
+
+    if (elapsedTime < 3000) {
+      Serial.println("Forward");
+      motorRight.setVoltage(3);
+      motorLeft.setVoltage(3);
+    } else if (elapsedTime < 6000) {
+      Serial.println("Rotate Left");
+      motorRight.setVoltage(3);
+      motorLeft.setVoltage(-3);
+    } else if (elapsedTime < 9000) {
+      Serial.println("Rotate Right");
+      motorRight.setVoltage(-3);
+      motorLeft.setVoltage(3);
+    } else if (elapsedTime < 12000) {
+      Serial.println("Backward");
+      motorRight.setVoltage(-3);
+      motorLeft.setVoltage(-3);
+    } else if (elapsedTime < 17000) {
+      Serial.println("Stop");
+      motorRight.setVoltage(0);
+      motorLeft.setVoltage(0);
+    }
 
   robot.motorLeft.applyVoltage();
   robot.motorRight.applyVoltage();
 
   // // Update variables
   // robot.updateState(); 
-}  
+  }
+}
 
 
 

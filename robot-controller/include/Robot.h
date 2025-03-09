@@ -1,14 +1,24 @@
 #pragma once
 
+#include "MotorController.h"
+#include "InverseMotorModel.h"
+#include <math.h>
+
 class Robot {
 public:
-    Robot(MotorController leftMotor, MotorController rightMotor);
-    void init();
-    void setSpeed(float linearSpeed, float rotationalSpeed);
-    void stop();
+    Robot(Point pos, Motor& motorLeft, Motor& motorRight, MotorController& motorControllerLeft, MotorController& motorControllerRight, InverseMotorModel& inverseMotorModel, double theta);
+    void updateState();
+    void readMarvelmind();
+    double getTheta();
+
+    Point pos;
+    Motor& motorLeft;
+    Motor& motorRight;
+    MotorController& motorControllerLeft;
+    MotorController& motorControllerRight;
+    InverseMotorModel& inverseMotorModel;
 
 private:
-    MotorController leftMotor;
-    MotorController rightMotor;
-    float length;
+    double theta;
+    double v, w;
 };

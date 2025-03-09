@@ -1,7 +1,7 @@
-#include "Utils.h"
+#include "../include/Utils.h"
 
 // Function to convert a value to PWM
-int convertToPWM(int value) {
+int convertToPWM(const int value) {
     // Ensure the value is within the PWM range
     if (value < 0) {
         return 0;
@@ -11,6 +11,6 @@ int convertToPWM(int value) {
     return value * V2PWM;
 }
 
-float myAbs(float value){
+float myAbs(const float value){
     return (value >= 0) ? value : -value;
 }
