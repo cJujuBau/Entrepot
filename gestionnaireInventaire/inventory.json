@@ -12,7 +12,7 @@
         "aisleR": 1,
         "id": 2,
         "name": "Screwdriver",
-        "quantity": 9,
+        "quantity": 6,
         "row": 2
     },
     {
@@ -44,7 +44,7 @@
         "aisleR": 1,
         "id": 6,
         "name": "Impact Driver",
-        "quantity": 12,
+        "quantity": 10,
         "row": 3
     },
     {
@@ -52,7 +52,7 @@
         "aisleR": 2,
         "id": 7,
         "name": "Battery 18V",
-        "quantity": 18,
+        "quantity": 17,
         "row": 4
     },
     {
@@ -68,7 +68,7 @@
         "aisleR": -1,
         "id": 9,
         "name": "Multitool",
-        "quantity": 6,
+        "quantity": 4,
         "row": 4
     },
     {

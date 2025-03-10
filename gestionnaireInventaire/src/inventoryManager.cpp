@@ -43,7 +43,7 @@ private:
 
     // Pointer for shared memory
     void* shm_ptr;
-    int pidMain =-1;
+    int pidMain = 999999;
 
 public:
     InventoryManager(const std::string& file) : filePath(file), shm_ptr(nullptr) {
@@ -79,7 +79,7 @@ public:
         std::ifstream file(PATH_FPID_MAIN);
         if (!file) {
             std::cerr << "Failed to open main PID file!" << std::endl;
-            return;
+            exit(EXIT_FAILURE);
         }
         file >> pidMain;
         CHECK(pidMain, "Failed to read main PID");

@@ -4,13 +4,14 @@ CFLAGS+=-I./include
 
 
 LIBS=-lpthread
+LIBS+=-lrt
 
 ifeq ($(D), 1)
 	CFLAGS +=-DDEBUG
 	CFLAGS +=-g
 endif
 
-all: bin/main
+all: bin/main bin/inventoryManager
 
 
 ###########################
@@ -42,7 +43,7 @@ bin/server.o: src/server.c
 ###########################
 
 bin/inventoryManager: src/inventoryManager.cpp
-	g++  $(CFLAGS) $^ -o $@ -lncurses 
+	g++  $(CFLAGS) $^ -o $@ -lncurses -lpthread -std=c++17 $(LIBS)
 
 
 ###########################
