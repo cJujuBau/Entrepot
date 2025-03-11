@@ -9,7 +9,7 @@ Robot::Robot(Point pos, Motor& motorLeft, Motor& motorRight, MotorController& mo
 void Robot::updateState(){
     double Vg = motorLeft.getSpeed();
     double Vd = motorRight.getSpeed();
-    Serial.print("Vg = "); Serial.print(Vg); Serial.print("; Vd = "); Serial.println(Vd);
+    //Serial.print("Vg = "); Serial.print(Vg); Serial.print("; Vd = "); Serial.println(Vd);
     v = (Vg + Vd)/2;
     w = (Vd - Vg)/(2 * WIDTH);
     
@@ -50,7 +50,4 @@ double Robot::getW(){
 void Robot::init(){
     motorLeft.init();
     motorRight.init();
-  
-    attachInterrupt(digitalPinToInterrupt(motorLeft.getVA()), Motor::handleRisingEdge, RISING);
-    attachInterrupt(digitalPinToInterrupt(motorRight.getVA()), Motor::handleRisingEdge, RISING);
 }

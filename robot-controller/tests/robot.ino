@@ -16,8 +16,8 @@ const double Ky = 1.;
 const Point pos_init = Point(0, 0);
 const double theta_init = 0;
 
-Motor motorLeft(34, 35, 12, 18, 31, FORWARD);
-Motor motorRight(37, 36, 8, 19, 38, BACKWARD);
+Motor motorLeft(37, 36, 8, 19, 38, FORWARD);
+Motor motorRight(34, 35, 12, 18, 31, BACKWARD);
 
 MotorController motorControllerLeft(Km, Ki);
 MotorController motorControllerRight(Km, Ki);
@@ -26,10 +26,21 @@ InverseMotorModel inverseMotorModel(Kx, Ky);
 
 Robot robot(pos_init, motorLeft, motorRight, motorControllerLeft, motorControllerRight, inverseMotorModel, theta_init);
 
+void onRisingEdge_MD() {
+  motorRight.onRisingEdge();
+}
+
+void onRisingEdge_MG() {
+  motorLeft.onRisingEdge();
+}
+
 void setup() {
   // Initialize the robot
   Serial.begin(115200);
   robot.init();
+
+  attachInterrupt(digitalPinToInterrupt(motorLeft.getVA()), onRisingEdge_MG, RISING);
+  attachInterrupt(digitalPinToInterrupt(motorRight.getVA()), onRisingEdge_MD, RISING);
 }
 
 static int forwardOnce = 0;
@@ -42,6 +53,7 @@ void loop() {
   static long timePrec = 0;
   while (millis() - timePrec < DT) {}
   timePrec = millis();
+
 
   static unsigned long startTime = millis();
   unsigned long currentTime = millis();
@@ -58,6 +70,7 @@ void loop() {
       (rightOnce++ > 0) ? : Serial.println("Left"); 
       robot.changeRef(0, SPEED);
 
+
     } else if (elapsedTime <= 9000) {
       (leftOnce++ > 0) ? : Serial.println("Right");
       robot.changeRef(0, -SPEED);
@@ -71,6 +84,6 @@ void loop() {
       robot.changeRef(0, 0);
     }
 
-    Serial.print("v = "); Serial.print(robot.getV()); Serial.print("; w = "); Serial.print(robot.getW()); Serial.print("; theta = "); Serial.println(robot.getTheta());
+    //Serial.print("v = "); Serial.print(robot.getV()); Serial.print("; w = "); Serial.print(robot.getW()); Serial.print("; theta = "); Serial.println(robot.getTheta());
   }
 }

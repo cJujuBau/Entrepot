@@ -1,14 +1,11 @@
 #include "../include/Motor.h"
 
-Motor* Motor::instance = nullptr;
-
 Motor::Motor(int BI1, int BI2, int PWMB, int VA, int VB, int sens) : motorSpeed(0), BI1(BI1), BI2(BI2), PWMB(PWMB), sens(sens) {
     this->pulse = 0;
     this->pulsePrec = 0;
     this->tempsPrec = 0;
     this->u = 0;
     this->v = 0;
-    instance = this;
 }
 
 void Motor::init() {
@@ -23,6 +20,10 @@ void Motor::init() {
 
 int Motor::getVA() {
     return VA;
+}
+
+int Motor::getVB() {
+    return VB;
 }
 
 float Motor::getSpeed() {
@@ -49,12 +50,6 @@ void Motor::onRisingEdge(){
         pulse++;
     } else {
         pulse--;
-    }
-}
-
-void Motor::handleRisingEdge() {
-    if (instance) {
-        instance->onRisingEdge();
     }
 }
 

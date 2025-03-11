@@ -11,9 +11,10 @@ public:
     void setVoltage(const float voltage);
     void applyVoltage();
     float getSpeed();
+    long pulse; // number of pulse registered since last update
 
     int getVA();
-    static void handleRisingEdge();
+    int getVB();
     void onRisingEdge();
 
 private:
@@ -33,11 +34,8 @@ private:
 
     float u;    // appplied voltage
     float v;    // measured speed
-    long pulse; // number of pulse registered since last update
     long pulsePrec; // precedent pulse
     long tempsPrec; // time registered at last update
-
-    static Motor* instance; // Used for interruption
 
     void updateSpeed();
 };
