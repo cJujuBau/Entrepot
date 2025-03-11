@@ -31,6 +31,8 @@ static void signalHandler(int numSig){
     }
 }
 
+// Save the PID of the main process in a file for the other processes to use
+
 void savePID()
 {
     FILE *fpid;
@@ -63,7 +65,9 @@ int main()
 {
     pthread_t tidPause, tidServer;
 
-    atexit(bye);    
+    atexit(bye); 
+    
+    // Initialization of the robots
     initRobots();
 
     // Save pid in a file
@@ -86,7 +90,7 @@ int main()
     CHECK(pthread_create(&tidServer, NULL, threadServer, NULL), "pthread_create(tidServer)");
 
     
-
+    // Waiting for threads to finish
     pthread_join(tidPause, NULL);
     pthread_join(tidServer, NULL);
     

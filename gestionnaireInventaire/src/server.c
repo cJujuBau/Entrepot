@@ -180,9 +180,9 @@ void initRobots()
         robotsPositions[i]->sd = -1;
         robotsPositions[i]->x = 0;
         robotsPositions[i]->y = 0;
-        robotsPositions[i]->xRef = rand() % 1000;
-        robotsPositions[i]->yRef = rand() % 1000;
-        robotsPositions[i]->oRef = rand() % 360;
+        robotsPositions[i]->xRef = 0;
+        robotsPositions[i]->yRef = 0;
+        robotsPositions[i]->oRef = 0;
     }
 }
 

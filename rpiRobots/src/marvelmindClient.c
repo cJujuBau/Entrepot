@@ -62,6 +62,8 @@ void initRobotMarvelmind(RobotMarvelmind robotMarvelmind, const char* ttyFileNam
     robotMarvelmind->address = address;
 
     if (marvelmindOn){
+        // Create MarvelmindHedge same as in example on this link : https://github.com/MarvelmindRobotics/marvelmind.c/tree/master/src
+
         robotMarvelmind->hedge = createMarvelmindHedge();
         CHECK_NULL(robotMarvelmind->hedge, "Error: Unable to create MarvelmindHedge");
 
@@ -109,6 +111,7 @@ void getPositionMarvelmind(RobotMarvelmind robotMarvelmind, Position position){
 
 
             if (hedge->haveNewValues_){
+                // Same as printPositionFromMarvelmindHedge in marvelmind.c file
                 getPositionFromMarvelmindHedgeByAddress(hedge, &positionMM, robotMarvelmind->address);
         
                 if (positionMM.ready==true && positionMM.x < MAX_COORD && positionMM.x > MIN_COORD){
@@ -132,6 +135,7 @@ void getPositionMarvelmind(RobotMarvelmind robotMarvelmind, Position position){
     }    
 }
 
+// Encoding position to send to the server and serial port
 int encodePosition(char buffer[20], const Position position){
     sprintf(buffer, "p:%d,%d;", position->x, position->y);
     return strlen(buffer);
@@ -140,6 +144,7 @@ int encodePosition(char buffer[20], const Position position){
 
 #ifndef TEST_MM
 
+// Thread function to get and send position to the server and serial port
 void *threadGetAndSendPositionMarvelmind(void *arg){
     Position position = malloc(sizeof(struct Position));
     int size = -1;
@@ -161,10 +166,10 @@ void *threadGetAndSendPositionMarvelmind(void *arg){
         }
         
         // Network write
-        // if (sendToServer(sd, id, buffer, size) < 0){
-        //     perror("threadGetAndSendPositionMarvelmind: sendToServer failed");
-        //     getPositionON = 0;
-        // }
+        if (sendToServer(sd, id, buffer, size) < 0){
+            perror("threadGetAndSendPositionMarvelmind: sendToServer failed");
+            getPositionON = 0;
+        }
     }
 
     DEBUG_PRINT("threadGetAndSendPositionMarvelmind: End of thread\n");
@@ -199,6 +204,8 @@ void *threadGetAndSendPositionMarvelmind(void *arg){
 
 
 #ifdef TEST_MM
+
+// TO TEST THE FILE ONLY 
 
 // To be removed as function
 void printPositionMarvelmindRobot(RobotMarvelmind robotMarvelmind){

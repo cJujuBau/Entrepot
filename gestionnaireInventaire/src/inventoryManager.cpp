@@ -75,6 +75,7 @@ public:
         CHECK(close(shm_fd), "Failed to close shared memory file descriptor");
     }
 
+    // Get PID of the server to kill him after sending the order
     void getMainPID() {
         std::ifstream file(PATH_FPID_MAIN);
         if (!file) {
@@ -83,10 +84,10 @@ public:
         }
         file >> pidMain;
         CHECK(pidMain, "Failed to read main PID");
-        // std::cout << "Main PID: " << pidMain << std::endl;
     }
 
     void sendOrder() {
+        // Format the order as a string
         std::string orderStr = "{";
         
         for (const auto& [index, qty] : selectedItems) {
@@ -96,17 +97,19 @@ public:
         orderStr.pop_back();
         orderStr += "}";
 
-        // std::cout <<  std::endl <<"Order details: " << orderStr << std::endl;
 
         if (shm_ptr) {
-            // Copy selected items to shared memory
+            // Copy the order to shared memory
             memcpy(shm_ptr, orderStr.c_str(), orderStr.size() + 1);
+
+            // Wake up the server
             kill(pidMain, SIGUSR1);
         } else {
             std::cerr << "Shared memory is not open!" << std::endl;
         }
     }
 
+    // Get items from the JSON file
     void loadInventory() {
         std::ifstream file(filePath);
         if (!file) {
@@ -115,7 +118,7 @@ public:
         }
         file >> inventoryJson;
 
-        // Vider le vecteur items
+        
         items.clear();
 
         for (const auto& obj : inventoryJson) {
@@ -123,6 +126,7 @@ public:
         }
     }
 
+    // Save the updated inventory to the JSON file after each order
     void saveInventory() {
         for (const auto& [index, qty] : selectedItems) {
             inventoryJson[index]["quantity"] = inventoryJson[index]["quantity"].get<int>() - qty;
@@ -131,6 +135,7 @@ public:
         file << inventoryJson.dump(4);
     }
 
+    // Display the inventory in a window
     void displayInventory(WINDOW* win, int highlight) {
         werase(win);
         box(win, 0, 0);
@@ -145,6 +150,7 @@ public:
         wrefresh(win);
     }
 
+    // Display a window to confirm or cancel the order
     void showValidationWindow() {
         WINDOW* valWin = newwin(HEIGHT_SUB_WINDOW, WIDTH_SUB_WINDOW, START_WIDTH_SUB_WINDOW, START_HEIGHT_SUB_WINDOW);
         box(valWin, 0, 0);
@@ -156,9 +162,9 @@ public:
         while ((choice = wgetch(valWin))) {
             if (choice == 'y' || choice == 'Y') {
                 saveInventory();
-
                 sendOrder();
 
+                // Reload the inventory after sending the order to update the quantities
                 loadInventory();
                 selectedItems.clear(); // a voir
                 break;
@@ -170,6 +176,7 @@ public:
         delwin(valWin);
     }
     
+    // Select items from the inventory
     void selectItems() {
         initscr();
         noecho();
@@ -200,7 +207,7 @@ public:
         endwin();
     }
 
-
+    // Get the quantity of the selected item in a new window
     int getQuantity(WINDOW* win, const std::string& itemName, int availableQty) {
         int qty = 0;
         while (true) {
@@ -213,7 +220,8 @@ public:
             wscanw(win, "%d", &qty);
             noecho();
             curs_set(0);
-    
+            
+            // Check if the quantity is valid
             if (qty > availableQty) showErrorWindow("Quantity exceeds available stock!");
             else if (qty <= 0) {
                 showErrorWindow("Invalid quantity!");
@@ -225,6 +233,7 @@ public:
         return qty;
     }
 
+    // Error window to display messages and wait for user input
     void showErrorWindow(const std::string& message) {
         WINDOW* errWin = newwin(HEIGHT_SUB_WINDOW, WIDTH_SUB_WINDOW, START_WIDTH_SUB_WINDOW, START_HEIGHT_SUB_WINDOW);
         box(errWin, 0, 0); // box(WINDOW *win, chtype verch, chtype horch);

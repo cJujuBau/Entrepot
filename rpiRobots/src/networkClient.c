@@ -56,6 +56,7 @@ void sendObstacleDetected(const char *buffer, int size){
     }
 }
 
+// Thread to always listen the socket for the server messages
 void *threadReceptionReseau(void *arg){
     char buffer[100];
     int nbChar;

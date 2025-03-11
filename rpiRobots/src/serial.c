@@ -88,6 +88,7 @@ int readSerial(int port, char* buffer, int size){
     return index;
 }
 
+// Thread to always listen the serial port for the arduino messages
 void *threadReceptionSerie(void *arg){
     char buffer[100];
     int nbChar = 0;
@@ -110,6 +111,8 @@ void closeSerialPort(int port){
 }
 
 #ifdef TEST_SERIAL
+
+// To test only this file 
 
 // Example usage:
 #define PORT_ARDUINO "/dev/ttyS0"

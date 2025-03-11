@@ -11,6 +11,7 @@
 #include <order.h>
 #include <path.h>
 
+// Thread to wait for a new order
 void *threadWaitOrder(void *arg){
     while(1){
         pause();
@@ -54,6 +55,6 @@ void newOrder(){
     close(shmFd);
 
     
-    // Process the order
+    // Process the order TODO
     
 }
