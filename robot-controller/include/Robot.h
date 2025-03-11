@@ -11,7 +11,7 @@ public:
           InverseMotorModel& inverseMotorModel, double theta);
     void updateState();
     void readMarvelmind();
-    void changeRef(const double Vx, const double Vy);
+    void changeRef(const Point pos_ref);
     void init();
 
     double getTheta();

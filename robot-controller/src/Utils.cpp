@@ -8,9 +8,13 @@ int convertToPWM(const int value) {
     } else if (value * V2PWM > PWM_MAX) {
         return PWM_MAX;
     }
-    return value * V2PWM;
+    return int(value * V2PWM);
 }
 
 float myAbs(const float value){
     return (value >= 0) ? value : -value;
+}
+
+float deg2rad(const float angle){
+    return angle * PI/180;
 }

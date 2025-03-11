@@ -8,11 +8,19 @@ const double ROT_SPEED = PI/4.; // rad.s-1
 const double Km = 1./50.;
 const double Ki = 0.;
 
-Motor motorLeft(34, 35, 12, 18, 31, FORWARD);
-Motor motorRight(37, 36, 8, 19, 38, BACKWARD);
+Motor motorRight(34, 35, 12, 18, 31, FORWARD);
+Motor motorLeft(37, 36, 8, 19, 38, BACKWARD);
 
 MotorController motorControllerLeft(Km, Ki);
 MotorController motorControllerRight(Km, Ki);
+
+void onRisingEdge_MD() {
+  motorRight.onRisingEdge();
+}
+
+void onRisingEdge_MG() {
+  motorLeft.onRisingEdge();
+}
 
 void setup() {
   // Initialize the robot
@@ -20,8 +28,8 @@ void setup() {
   motorLeft.init();
   motorRight.init();
   
-  attachInterrupt(digitalPinToInterrupt(motorLeft.getVA()), Motor::handleRisingEdge, RISING);
-  attachInterrupt(digitalPinToInterrupt(motorRight.getVA()), Motor::handleRisingEdge, RISING);
+  attachInterrupt(digitalPinToInterrupt(motorLeft.getVA()), onRisingEdge_MG, RISING);
+  attachInterrupt(digitalPinToInterrupt(motorRight.getVA()), onRisingEdge_MD, RISING);
 }
 
 static int forwardOnce = 0;
@@ -54,7 +62,7 @@ void loop() {
     motorControllerLeft.setControlledVoltage(-SPEED);
     motorControllerRight.setControlledVoltage(SPEED);
     if (rightOnce++ == 0){
-      Serial.println("Rotate Right");
+      Serial.println("Rotate Left");
       Serial.println(motorControllerLeft.getControlledVoltage());
       Serial.println(motorControllerRight.getControlledVoltage());
     } 
@@ -62,7 +70,7 @@ void loop() {
     motorRight.setVoltage(motorControllerRight.getControlledVoltage());
 
   } else if (elapsedTime <= 9000) {
-    (leftOnce++ > 0) ? : Serial.println("Rotate Left");
+    (leftOnce++ > 0) ? : Serial.println("Rotate Right");
     motorControllerLeft.setControlledVoltage(SPEED);
     motorControllerRight.setControlledVoltage(-SPEED);
     motorLeft.setVoltage(motorControllerLeft.getControlledVoltage());

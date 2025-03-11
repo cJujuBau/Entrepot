@@ -17,7 +17,7 @@ public:
     int getVB();
     void onRisingEdge();
 
-private:
+//private:
     int motorSpeed;
     // Pins used to handle coder
     int VA; // VA pin number

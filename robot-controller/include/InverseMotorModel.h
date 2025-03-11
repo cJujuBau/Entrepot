@@ -10,14 +10,14 @@ class InverseMotorModel {
 public:
     InverseMotorModel(double Kx, double Ky);
 
-    void setReference(const Point new_vel_ref);
+    void setReference(const Point new_pos_ref, const Point robot_pos);
     void update(const double theta);
     
     double getVdStar();
     double getVgStar();
 
 private:
-    Point vel_ref;
+    Point pos_ref;
     double Kx;
     double Ky;
     double Vd_star;
