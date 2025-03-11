@@ -1,127 +1,111 @@
 [
     {
-        "aisleL": 1,
-        "aisleR": -1,
+        "aisle": 4,
         "id": 1,
         "name": "Hammer",
-        "quantity": 6,
+        "quantity": 5,
         "row": 1
     },
     {
-        "aisleL": 2,
-        "aisleR": 1,
+        "aisle": 1,
         "id": 2,
         "name": "Screwdriver",
         "quantity": 6,
         "row": 2
     },
     {
-        "aisleL": 3,
-        "aisleR": 2,
+        "aisle": 2,
         "id": 3,
         "name": "Wrench",
         "quantity": 12,
         "row": 3
     },
     {
-        "aisleL": -1,
-        "aisleR": 3,
+        "aisle": 3,
         "id": 4,
         "name": "Drill",
         "quantity": 12,
         "row": 4
     },
     {
-        "aisleL": 1,
-        "aisleR": -1,
+        "aisle": 4,
         "id": 5,
         "name": "Angle Grinder",
         "quantity": 7,
         "row": 2
     },
     {
-        "aisleL": 2,
-        "aisleR": 1,
+        "aisle": 1,
         "id": 6,
         "name": "Impact Driver",
         "quantity": 10,
         "row": 3
     },
     {
-        "aisleL": 3,
-        "aisleR": 2,
+        "aisle": 2,
         "id": 7,
         "name": "Battery 18V",
         "quantity": 17,
         "row": 4
     },
     {
-        "aisleL": -1,
-        "aisleR": 3,
+        "aisle": 3,
         "id": 8,
         "name": "Charger",
         "quantity": 20,
         "row": 1
     },
     {
-        "aisleL": 1,
-        "aisleR": -1,
+        "aisle": 4,
         "id": 9,
         "name": "Multitool",
         "quantity": 4,
         "row": 4
     },
     {
-        "aisleL": 2,
-        "aisleR": 1,
+        "aisle": 1,
         "id": 10,
         "name": "Table Saw",
         "quantity": 5,
         "row": 1
     },
     {
-        "aisleL": 3,
-        "aisleR": 2,
+        "aisle": 2,
         "id": 11,
         "name": "Plunge Saw",
         "quantity": 3,
         "row": 2
     },
     {
-        "aisleL": -1,
-        "aisleR": 3,
+        "aisle": 3,
         "id": 12,
         "name": "Circular Saw",
         "quantity": 9,
         "row": 3
     },
     {
-        "aisleL": 1,
-        "aisleR": -1,
+        "aisle": 4,
         "id": 13,
         "name": "Routers",
         "quantity": 11,
         "row": 3
     },
     {
-        "aisleL": 2,
-        "aisleR": 1,
+        "aisle": 1,
         "id": 14,
         "name": "Heatgun",
         "quantity": 6,
         "row": 4
     },
     {
-        "aisleL": 3,
-        "aisleR": 2,
+        "aisle": 2,
         "id": 15,
         "name": "Orbit Sander",
         "quantity": 18,
         "row": 1
     },
     {
-        "aisleL": -1,
-        "aisleR": 3,
+        "aisle": 3,
         "id": 16,
         "name": "Jigsaw",
         "quantity": 10,
