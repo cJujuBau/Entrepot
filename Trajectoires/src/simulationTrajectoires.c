@@ -8,13 +8,13 @@
 #define NOMBRE_ALLEES (NOMBRE_ETAGERES - 1)
 #define NOMBRE_ROBOTS 3
 #define NOMBRE_SECTIONS_PRINCIPALES (2*NOMBRE_ETAGERES + 4) // attention il faut que cette variable soit dynamique
-#define LARGEUR_SECTION 200
-#define VITESSE_ROBOT 0.2
-#define LONGUEUR_ETAGERE 400
-#define LARGEUR_ETAGERE 100
+#define LARGEUR_SECTION 200 // 200
+#define VITESSE_ROBOT 0.15
+#define LONGUEUR_ETAGERE 400 // 400
+#define LARGEUR_ETAGERE 100 // 100 
 #define LONGUEUR_BAC 250
-#define LARGEUR_BAC 100
-#define ECART_LONGUEUR 200 //300
+#define LARGEUR_BAC 100 // 100
+#define ECART_LONGUEUR 200 //200
 #define LONGUEUR_ENVIRONNEMENT 1650 // 1650
 #define LARGEUR_ENVIRONNEMENT 1000
 #define LARGEUR_ALLEE (( LONGUEUR_ENVIRONNEMENT - 2 * ECART_LONGUEUR - LARGEUR_ETAGERE ) / (NOMBRE_ETAGERES - 1) - LARGEUR_ETAGERE)
@@ -98,7 +98,7 @@ void creer_robot(robot** r, int n_section, int n_wayPoint) {
     actualiseSectionWayPointRobot(rbt,n_section,n_wayPoint);
     sfVector2f pos = s_principale[n_section]->point_section[n_wayPoint];
     actualisePositionRobot(rbt,pos);
-    sfCircleShape_setRadius(rbt->cercle, 25); // rayon fixe pour le moment
+    sfCircleShape_setRadius(rbt->cercle, 15); // rayon fixe pour le moment
     sfCircleShape_setFillColor(rbt->cercle,sfRed);
 }
 
@@ -151,7 +151,7 @@ void setupEnvironment() {
     }
 
     // dessin d'un robot pour le moment (a adapter quand on augmente le nombre de robots)
-    creer_robot(&rbt,6,0); // section 0, wayPoint 0
+    creer_robot(&rbt,3,0); // section 0, wayPoint 0
     
 }
 
@@ -169,14 +169,7 @@ void creer_cycle_principal()
     s_principale[0] = creer_section(2,pos0); // je créer la section 0 du cycle principal
 
     int pos[2];
-    // for(int i=1; i <= (NOMBRE_ALLEES + NOMBRE_ETAGERES - 2) + 1; i++)
-    // {
-    //     pos[0] = 1725 - (i+1) * (700 / NOMBRE_ETAGERES);
-    //     //pos[0] = LONGUEUR_ENVIRONNEMENT - ECART_LONGUEUR - LARGEUR_ETAGERE - 
-    //     pos[1] = 460;
-    //     //pos[1] = LONGUEUR_ETAGERE + LARGEUR_SECTION / 2;
-    //     s_principale[i] = creer_section(1,pos);
-    // }
+
     for(int i=1; i <= NOMBRE_ETAGERES -1 ; i++)
     {
         printf("i = %d \n", i);
@@ -213,20 +206,6 @@ void creer_cycle_principal()
     s_principale[2*NOMBRE_ETAGERES+2] = creer_section(1,pos);
     pos[0] = ECART_LONGUEUR +  2 * LARGEUR_BAC + 3 * LARGEUR_ALLEE / 2;
     s_principale[2*NOMBRE_ETAGERES+3] = creer_section(1,pos);
-
-    // pos[0] = 1725 - ((NOMBRE_ALLEES + NOMBRE_ETAGERES) + 2) * (700 / NOMBRE_ETAGERES);
-    // pos[1] = 670;
-    // s_principale[(NOMBRE_ALLEES + NOMBRE_ETAGERES) + 2] = creer_section(1,pos);
-
-    // for(int i=0; i <= 4; i++)
-    // {
-    //     pos[0] = 325 + i * (700 / NOMBRE_ETAGERES);
-    //     pos[1] = 670;
-    //     s_principale[(NOMBRE_ALLEES + NOMBRE_ETAGERES) + 3 + i] = creer_section(1,pos);
-    // }
-    // pos[0] = ((325 + 4 * (700 / NOMBRE_ETAGERES)) + 1725) / 2;
-    // pos[1] = 670;
-    // s_principale[NOMBRE_SECTIONS_PRINCIPALES - 1] = creer_section(1,pos);
 }
 
 // fermer la fenetre quand on clique sur la croix
