@@ -45,6 +45,7 @@ void Motor::updateSpeed(){
 
 void Motor::onRisingEdge(){
     if (digitalRead(VB)) {
+        Serial.println("Pulse");
         pulse++;
     } else {
         pulse--;

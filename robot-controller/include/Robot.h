@@ -15,6 +15,8 @@ public:
     void init();
 
     double getTheta();
+    double getV();
+    double getW();
 
     Motor& motorLeft;
     Motor& motorRight;

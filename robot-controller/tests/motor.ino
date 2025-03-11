@@ -1,4 +1,4 @@
-#include "../include/Motor.h"
+#include "include/Motor.h"
 
 const double SPEED = 100.0;
 const double ROT_SPEED = PI/4;
