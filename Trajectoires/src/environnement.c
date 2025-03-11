@@ -55,7 +55,7 @@ void setupEnvironment() {
         sfRectangleShape_setPosition(bac[i], pos);
     }
 
-    creer_robot(&rbt,6,0);
+    creer_robot(&rbt,0,0);
 }
 
 void processEvents()

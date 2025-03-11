@@ -19,7 +19,7 @@ int main()
         processEvents();
         render();
         //testAvancer();
-        if(deplacementSection(rbt,2) == 0)
+        if(deplacementSection(rbt,10) == 0)
         {
             printf("On est arrivé ! \n");
             clean();

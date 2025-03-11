@@ -27,13 +27,13 @@ section_cycle_principal *creer_section(int nombre_points, int* points) {
 
 void creer_cycle_principal()
 {
-    int pos0[4];
-    pos0[0] =  LONGUEUR_ENVIRONNEMENT - LARGEUR_SECTION / 2;
-    pos0[1] = LARGEUR_ENVIRONNEMENT - LONGUEUR_BAC - LARGEUR_SECTION / 2;
-    pos0[2] = LONGUEUR_ENVIRONNEMENT - LARGEUR_SECTION / 2;
-    pos0[3] = LONGUEUR_ETAGERE + LARGEUR_SECTION / 2;
-    printf("Deuxieme wayPoint section 0 : (%d,%d) \n", pos0[2],pos0[3]);
-    s_principale[0] = creer_section(2,pos0);
+    int pos2[4];
+    pos2[0] =  LONGUEUR_ENVIRONNEMENT - LARGEUR_SECTION / 2;
+    pos2[1] = LARGEUR_ENVIRONNEMENT - LONGUEUR_BAC - LONGUEUR_ALLEE_BAC - LARGEUR_SECTION / 2;
+    pos2[2] = LONGUEUR_ENVIRONNEMENT - LARGEUR_SECTION / 2;
+    pos2[3] = LONGUEUR_ETAGERE + LARGEUR_SECTION / 2;
+    printf("Deuxieme wayPoint section 0 : (%d,%d) \n", pos2[2],pos2[3]);
+    s_principale[0] = creer_section(2,pos2);
 
     int pos[2];
 
@@ -57,18 +57,21 @@ void creer_cycle_principal()
         }
     }
 
-    pos[0] = LARGEUR_SECTION / 2;
-    pos[1] = LONGUEUR_ETAGERE + LARGEUR_SECTION / 2;
-    s_principale[2*(NOMBRE_ETAGERES - 1)] = creer_section(1,pos);
-    pos[1] = LARGEUR_ENVIRONNEMENT - LONGUEUR_BAC - LARGEUR_SECTION / 2;
+    pos2[0] = LARGEUR_SECTION / 2;
+    pos2[1] = LONGUEUR_ETAGERE + LARGEUR_SECTION / 2;
+    pos2[2] = LARGEUR_SECTION / 2;
+    pos2[3] = LARGEUR_ENVIRONNEMENT - LONGUEUR_BAC - LONGUEUR_ALLEE_BAC - LARGEUR_SECTION / 2;
+    s_principale[2*(NOMBRE_ETAGERES - 1)] = creer_section(2,pos2);
+    pos[0] = ECART_LONGUEUR + LARGEUR_BAC / 2;
+    pos[1] = LARGEUR_ENVIRONNEMENT - LONGUEUR_BAC - LONGUEUR_ALLEE_BAC -  LARGEUR_SECTION / 2;
     s_principale[2*NOMBRE_ETAGERES - 1] = creer_section(1,pos);
 
-    pos[0] = ECART_LONGUEUR + LARGEUR_BAC / 2;
-    s_principale[2*NOMBRE_ETAGERES] = creer_section(1,pos);
     pos[0] = ECART_LONGUEUR + LARGEUR_BAC + LARGEUR_ALLEE / 2;
+    s_principale[2*NOMBRE_ETAGERES] = creer_section(1,pos);
+    pos[0] = ECART_LONGUEUR + LARGEUR_ALLEE + 3*LARGEUR_BAC / 2;
     s_principale[2*NOMBRE_ETAGERES+1] = creer_section(1,pos);
-    pos[0] = ECART_LONGUEUR +  3 * LARGEUR_BAC / 2 + LARGEUR_ALLEE;
-    s_principale[2*NOMBRE_ETAGERES+2] = creer_section(1,pos);
-    pos[0] = ECART_LONGUEUR +  2 * LARGEUR_BAC + 3 * LARGEUR_ALLEE / 2;
-    s_principale[2*NOMBRE_ETAGERES+3] = creer_section(1,pos);
+    // pos[0] = ECART_LONGUEUR +  3 * LARGEUR_BAC / 2 + LARGEUR_ALLEE;
+    // s_principale[2*NOMBRE_ETAGERES+2] = creer_section(1,pos);
+    // pos[0] = ECART_LONGUEUR +  2 * LARGEUR_BAC + 3 * LARGEUR_ALLEE / 2;
+    // s_principale[2*NOMBRE_ETAGERES+3] = creer_section(1,pos);
 }
