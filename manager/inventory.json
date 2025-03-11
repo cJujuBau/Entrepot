@@ -3,14 +3,14 @@
         "aisle": 4,
         "id": 1,
         "name": "Hammer",
-        "quantity": 5,
+        "quantity": 2,
         "row": 1
     },
     {
         "aisle": 1,
         "id": 2,
         "name": "Screwdriver",
-        "quantity": 6,
+        "quantity": 4,
         "row": 2
     },
     {
@@ -31,14 +31,14 @@
         "aisle": 4,
         "id": 5,
         "name": "Angle Grinder",
-        "quantity": 7,
+        "quantity": 3,
         "row": 2
     },
     {
         "aisle": 1,
         "id": 6,
         "name": "Impact Driver",
-        "quantity": 10,
+        "quantity": 4,
         "row": 3
     },
     {
@@ -80,7 +80,7 @@
         "aisle": 3,
         "id": 12,
         "name": "Circular Saw",
-        "quantity": 9,
+        "quantity": 7,
         "row": 3
     },
     {

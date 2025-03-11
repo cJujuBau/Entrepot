@@ -5,6 +5,7 @@ CFLAGS+=-I./include
 
 LIBS=-lpthread
 LIBS+=-lrt
+LIBS+=-ljansson
 
 ifeq ($(D), 1)
 	CFLAGS +=-DDEBUG
@@ -51,7 +52,10 @@ bin/inventoryManager: src/inventoryManager.cpp
 ###########################
 
 bin/order.o: src/order.c
-	gcc $(CFLAGS) -c $^ -o $@ $(LIBS)
+	gcc $(CFLAGS) -c $^ -o $@ $(LIBS) -lsfml-graphics -lsfml-window -lsfml-system
+
+bin/orderTest: src/order.c
+	gcc $(CFLAGS) -DDEBUG -DTEST_ORDER  $^ -o $@ $(LIBS) -lsfml-graphics -lsfml-window -lsfml-system
 
 ###########################
 #		 CLEAN			  #
