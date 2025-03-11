@@ -3,6 +3,7 @@
 #define SECTIONS_H
 
 #include <SFML/Graphics.h>
+#include <pthread.h>
 
 #define NOMBRE_ETAGERES 4
 #define NOMBRE_ALLEES (NOMBRE_ETAGERES - 1)
@@ -23,6 +24,7 @@ typedef struct section_cycle_principal
 {
     int nombre_points;
     sfVector2f* point_section;
+    pthread_mutex_t mutex;
 } section_cycle_principal;
 
 extern section_cycle_principal* s_principale[]; // Déclaration de la variable externe

@@ -6,7 +6,7 @@
 
 sfRenderWindow *window = NULL; // Définition de la variable externe
 int compteur = 0; // Définition de la variable externe
-float VITESSE_ROBOT = 0.15; // Définition de la variable externe
+float VITESSE_ROBOT = 0.4; // Définition de la variable externe
 sfRectangleShape *etagere[NOMBRE_ETAGERES]; // Définition de la variable externe
 sfRectangleShape *bac[2]; // Définition de la variable externe
 
@@ -55,7 +55,7 @@ void setupEnvironment() {
         sfRectangleShape_setPosition(bac[i], pos);
     }
 
-    creer_robot(&rbt,0,0);
+    creer_robot(&rbt,9,0);
 }
 
 void processEvents()

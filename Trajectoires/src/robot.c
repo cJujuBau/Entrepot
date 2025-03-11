@@ -8,6 +8,7 @@
 #include <math.h>
 #include <SFML/Graphics.h>
 #include <SFML/Graphics.h>
+#include <pthread.h>
 
 robot* rbt = NULL; // Définition de la variable externe
 
@@ -47,7 +48,9 @@ void actualiseSectionWayPointRobot(robot* rbt, int n_section, int n_wayPoint)
     rbt->numero_wayPoint = n_wayPoint;
 }
 
-
+// déplace légèrement le robot vers la position finale
+// si la distance entre la position actuelle et la position finale est supérieure à 5
+// sinon, il ne fait rien
 int Deplacement_elementaire(robot* rbt, sfVector2f posfinale)
 {
     sfVector2f posRobot = *(rbt->pos);
@@ -65,32 +68,61 @@ int Deplacement_elementaire(robot* rbt, sfVector2f posfinale)
 
 int deplacementSection(robot* rbt, int numero_section_objectif)
 {
+    printf("On veut se rendre à la section %d \n", numero_section_objectif);
+    printf("On est à la section %d et au wayPoint %d \n", rbt->numero_section, rbt->numero_wayPoint);
+
     int resultat_deplacement;
     int indice_prochaine_section;
     int indice_prochain_wayPoint;
+    int derniere_section = rbt->numero_section; // Variable pour suivre la dernière section
     
+    // Si on n'est pas au dernier wayPoint de la section
     if(rbt->numero_wayPoint < (s_principale[(rbt->numero_section)]->nombre_points)-1)
     {
+        //printf("On se déplace vers la fin de la section \n");
         indice_prochaine_section = rbt->numero_section;
         indice_prochain_wayPoint = rbt->numero_wayPoint + 1;
+        //printf("Prochaine section : %d / prochain waypoint : %d \n", indice_prochaine_section, indice_prochain_wayPoint);
+        resultat_deplacement = Deplacement_elementaire(rbt, s_principale[indice_prochaine_section]->point_section[indice_prochain_wayPoint]);
+        
+        if (resultat_deplacement == 0)
+        {
+            actualiseSectionWayPointRobot(rbt, indice_prochaine_section, indice_prochain_wayPoint);
+        }
     }
     else
     {
+        printf("On est à la fin d'une section \n");
+        // Si on est à l'endroit auquel on veut se rendre
         if(rbt->numero_section == numero_section_objectif)
         {
             return 0;
         }
+        // sinon, on se rend à la section d'après
+        indice_prochaine_section = ((rbt->numero_section) + 1) % NOMBRE_SECTIONS_PRINCIPALES;
+        indice_prochain_wayPoint = 0;
+
+        // le robot à la mutex pour se rendre à la prochaine section
+        if (rbt->hasMutex)
+        {
+            resultat_deplacement = Deplacement_elementaire(rbt, s_principale[indice_prochaine_section]->point_section[indice_prochain_wayPoint]);
+            if (resultat_deplacement == 0)
+            {
+                actualiseSectionWayPointRobot(rbt, indice_prochaine_section, indice_prochain_wayPoint);
+                printf("On vient d'arriver à la section %d, on va lacher la mutex de la section precedente \n", indice_prochaine_section);
+                pthread_mutex_unlock(&s_principale[derniere_section]->mutex);
+                rbt->hasMutex = 0;
+                derniere_section = indice_prochaine_section;
+            }
+        }
         else
         {
-            indice_prochaine_section = ((rbt->numero_section) + 1) % NOMBRE_SECTIONS_PRINCIPALES;
-            indice_prochain_wayPoint = 0;
+            if (pthread_mutex_trylock(&s_principale[indice_prochaine_section]->mutex) == 0)
+            {
+                printf("On vient de prendre la mutex de la section %d \n", indice_prochaine_section);
+                rbt->hasMutex = 1;
+            }
         }
-    }
-
-    resultat_deplacement = Deplacement_elementaire(rbt,s_principale[indice_prochaine_section]->point_section[indice_prochain_wayPoint]);
-    if(resultat_deplacement == 0)
-    {
-        actualiseSectionWayPointRobot(rbt,indice_prochaine_section,indice_prochain_wayPoint);
     }
     return 1;
 }

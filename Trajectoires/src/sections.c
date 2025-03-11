@@ -22,6 +22,14 @@ section_cycle_principal *creer_section(int nombre_points, int* points) {
     {
         section->point_section[i] = (sfVector2f){points[2*i],points[2*i+1]};
     }
+
+    // Initialiser le mutex
+    if (pthread_mutex_init(&section->mutex, NULL) != 0) {
+        printf("Erreur: Impossible d'initialiser le mutex.\n");
+        free(section->point_section);
+        free(section);
+        return NULL;
+    }
     return section;
 }
 
@@ -32,21 +40,21 @@ void creer_cycle_principal()
     pos2[1] = LARGEUR_ENVIRONNEMENT - LONGUEUR_BAC - LONGUEUR_ALLEE_BAC - LARGEUR_SECTION / 2;
     pos2[2] = LONGUEUR_ENVIRONNEMENT - LARGEUR_SECTION / 2;
     pos2[3] = LONGUEUR_ETAGERE + LARGEUR_SECTION / 2;
-    printf("Deuxieme wayPoint section 0 : (%d,%d) \n", pos2[2],pos2[3]);
+    //printf("Deuxieme wayPoint section 0 : (%d,%d) \n", pos2[2],pos2[3]);
     s_principale[0] = creer_section(2,pos2);
 
     int pos[2];
 
     for(int i=1; i <= NOMBRE_ETAGERES -1 ; i++)
     {
-        printf("i = %d \n", i);
-        printf("LARGEUR_ALLEE : %d | LARGEUR_ETAGERE : %d \n", LARGEUR_ALLEE, LARGEUR_ETAGERE);
-        printf("LONGUEUR_ENVIRONNEMENT : %d | ECART_LONGUEUR  : %d \n", LONGUEUR_ENVIRONNEMENT, ECART_LONGUEUR);
-        printf("LONGUEUR_ENVIRONNEMENT - ECART_LONGUEUR - %d * (LARGEUR_ETAGERE + LARGEUR_ALLEE) + LARGEUR_ALLEE / 2 = %d \n", i, LONGUEUR_ENVIRONNEMENT - ECART_LONGUEUR - i * (LARGEUR_ETAGERE + LARGEUR_ALLEE) + LARGEUR_ALLEE / 2);
+        // printf("i = %d \n", i);
+        // printf("LARGEUR_ALLEE : %d | LARGEUR_ETAGERE : %d \n", LARGEUR_ALLEE, LARGEUR_ETAGERE);
+        // printf("LONGUEUR_ENVIRONNEMENT : %d | ECART_LONGUEUR  : %d \n", LONGUEUR_ENVIRONNEMENT, ECART_LONGUEUR);
+        // printf("LONGUEUR_ENVIRONNEMENT - ECART_LONGUEUR - %d * (LARGEUR_ETAGERE + LARGEUR_ALLEE) + LARGEUR_ALLEE / 2 = %d \n", i, LONGUEUR_ENVIRONNEMENT - ECART_LONGUEUR - i * (LARGEUR_ETAGERE + LARGEUR_ALLEE) + LARGEUR_ALLEE / 2);
 
         pos[0] = LONGUEUR_ENVIRONNEMENT - ECART_LONGUEUR - i * (LARGEUR_ETAGERE + LARGEUR_ALLEE) + LARGEUR_ALLEE / 2;
         pos[1] = LONGUEUR_ETAGERE + LARGEUR_SECTION / 2;
-        printf("Section numero %d (devant allée) : (%d,%d) \n", 2*i-1, pos[0], pos[1]);
+        //printf("Section numero %d (devant allée) : (%d,%d) \n", 2*i-1, pos[0], pos[1]);
         s_principale[2*i-1] = creer_section(1, pos);
 
         if(i != (NOMBRE_ETAGERES -1))
@@ -70,8 +78,15 @@ void creer_cycle_principal()
     s_principale[2*NOMBRE_ETAGERES] = creer_section(1,pos);
     pos[0] = ECART_LONGUEUR + LARGEUR_ALLEE + 3*LARGEUR_BAC / 2;
     s_principale[2*NOMBRE_ETAGERES+1] = creer_section(1,pos);
-    // pos[0] = ECART_LONGUEUR +  3 * LARGEUR_BAC / 2 + LARGEUR_ALLEE;
-    // s_principale[2*NOMBRE_ETAGERES+2] = creer_section(1,pos);
-    // pos[0] = ECART_LONGUEUR +  2 * LARGEUR_BAC + 3 * LARGEUR_ALLEE / 2;
-    // s_principale[2*NOMBRE_ETAGERES+3] = creer_section(1,pos);
+}
+
+void detruire_cycle_principal()
+{
+    for (int i = 0; i < NOMBRE_SECTIONS_PRINCIPALES; i++) {
+        if (s_principale[i] != NULL) {
+            pthread_mutex_destroy(&s_principale[i]->mutex); // Détruire le mutex
+            free(s_principale[i]->point_section);
+            free(s_principale[i]);
+        }
+    }
 }

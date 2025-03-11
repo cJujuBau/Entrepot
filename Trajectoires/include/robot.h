@@ -10,6 +10,7 @@ typedef struct robot
     sfCircleShape* cercle; 
     int numero_section;
     int numero_wayPoint;
+    int hasMutex; // 1 si le robot a pris la mutex de la section où il veut se rendre, 0 sinon
 } robot;
 
 extern robot* rbt; // Déclaration de la variable externe
