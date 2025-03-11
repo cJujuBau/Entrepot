@@ -141,7 +141,7 @@ int processStringReceived(const char *buffer, const int size, int sd)
     DEBUG_PRINT("idRobot=%d, commande=%c, args=%s\n", idRobot, commande, args);
     if (commande == 'p') {
         sscanf(args, "%d,%d;", &robotsPositions[idRobot]->x, &robotsPositions[idRobot]->y);
-        sendPosRef(idRobot);
+        //sendPosRef(idRobot);
     }
     if (commande == 'i') robotsPositions[idRobot]->sd = sd;
     if (commande == 'o') {

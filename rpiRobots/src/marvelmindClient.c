@@ -22,6 +22,25 @@ int getPositionON = 1;
 
 bool terminateProgram=false;
 
+// Marvelmind parameters : xMM = 3.9*y - 1700
+//                         yMM = -1.4*x - 200
+//                         x = - 70/100 * (yMM + 200)
+//                         y = 26/100 *(xMM + 1700)
+
+#define gainX -70 // 0.70 But we multiply by 100 to avoid float
+#define offsetX 200
+
+#define gainY 24  // 0.26 But we multiply by 10 to avoid float
+#define offsetY 1700
+
+#define coeffCorrection 100
+
+void transformPosition(Position position){
+    int x = position->x;
+    position->x = gainX * (position->y + offsetX) / coeffCorrection;
+    position->y = gainY * (x + offsetY) / coeffCorrection;
+}
+
 
 void CtrlHandler(int signum)
 {
@@ -95,6 +114,9 @@ void getPositionMarvelmind(RobotMarvelmind robotMarvelmind, Position position){
                 if (positionMM.ready==true && positionMM.x < MAX_COORD && positionMM.x > MIN_COORD){
                     position->x= positionMM.x;
                     position->y= positionMM.y;
+
+                    DEBUG_PRINT("getPositionMarvelmind: x=%d, y=%d\n", position->x, position->y);
+                    transformPosition(position);
                     
                     hedge->haveNewValues_=false;
                 }
@@ -129,7 +151,7 @@ void *threadGetAndSendPositionMarvelmind(void *arg){
         DEBUG_PRINT("threadGetAndSendPositionMarvelmind: x=%d, y=%d\n", position->x, position->y);
 
         size = encodePosition(buffer, position);
-        DEBUG_PRINT("threadGetAndSendPositionMarvelmind: sentBuffer=%s\n", buffer);
+        //DEBUG_PRINT("threadGetAndSendPositionMarvelmind: sentBuffer=%s\n", buffer);
         
         // Serial write
         if (raspiOn){
@@ -139,10 +161,10 @@ void *threadGetAndSendPositionMarvelmind(void *arg){
         }
         
         // Network write
-        if (sendToServer(sd, id, buffer, size) < 0){
-            perror("threadGetAndSendPositionMarvelmind: sendToServer failed");
-            getPositionON = 0;
-        }
+        // if (sendToServer(sd, id, buffer, size) < 0){
+        //     perror("threadGetAndSendPositionMarvelmind: sendToServer failed");
+        //     getPositionON = 0;
+        // }
     }
 
     DEBUG_PRINT("threadGetAndSendPositionMarvelmind: End of thread\n");
