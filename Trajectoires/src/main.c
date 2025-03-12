@@ -28,7 +28,7 @@ int main()
     chemin2Objet2[1] = (sfVector2f) {ECART_LONGUEUR + 2*LARGEUR_BAC + LARGEUR_ALLEE , LONGUEUR_ETAGERE / 8};
     ItemPath objet2 = {1, 2, 4, 1, 3, 2, chemin1Objet2, chemin2Objet2};
 
-    pthread_mutex_lock(&allee_etageres[1]->mutex);
+    //pthread_mutex_lock(&allee_etageres[0]->mutex);
 
     if (!window) return 1; // Vérification si la fenêtre a bien été créée
 
@@ -38,7 +38,7 @@ int main()
         render();
         //testAvancer();
 
-        // if(deplacementSection(rbt2,0) == 0)
+        // if(deplacementSection(rbt2,2) == 0)
         // {
         //     printf("On est arrivé robot 2 ! \n");
         //     //clean();
@@ -53,9 +53,21 @@ int main()
 
         // }
 
-        if(chercheObjet(rbt,objet1) == 0)
+        if(chercheObjet(1,rbt,objet1) == 0)
         {
-            printf("On a trouvé l'objet ! \n");
+            printf("Rbt1 a trouvé l'objet ! \n");
+            //clean();
+            //return 0;
+        }
+        if(chercheObjet(2,rbt2,objet2) == 0)
+        {
+            printf("Rbt2 a trouvé l'objet ! \n");
+            //clean();
+            //return 0;
+        }
+        if(chercheObjet(3,rbt3,objet2) == 0)
+        {
+            printf("Rbt3 a trouvé l'objet ! \n");
             //clean();
             //return 0;
         }

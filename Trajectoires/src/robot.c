@@ -137,19 +137,19 @@ int deplacementSection(robot* rbt, int numero_section_objectif)
     return 1;
 }
 
-int chercheObjet(robot* rbt, ItemPath objet)
+int chercheObjet(int id_robot, robot* rbt, ItemPath objet)
 {
-    // le robot n'est as encore dans l'allee
+    // le robot n'est pas encore dans l'allee
     if(!rbt->isInAisle)
     {
         // le robot a deja pris la mutex pour se deplacer vers une allee
         if(rbt->prochaineAllee != -1)
         {
             //printf("Le robot a déjà pris l'allée %d \n", rbt->prochaineAllee);
-            int entreeAllee = 1 + 2*(rbt->prochaineAllee-1);
+            int entreeAllee = 1 + 2*((rbt->prochaineAllee)-1);
             if(deplacementSection(rbt,entreeAllee) == 0)
             {
-                printf("On vient d'arriver devant l'allée %d \n", rbt->prochaineAllee);
+                printf("Le robot %d vient d'arriver devant l'allée %d \n", id_robot, rbt->prochaineAllee);
                 rbt->isInAisle = 1;
                 rbt->numero_wayPoint = 0; // wayPoint DANS L'ALLEE
             }
@@ -157,13 +157,13 @@ int chercheObjet(robot* rbt, ItemPath objet)
         // si le robot n'a pas encore pris une allee
         else
         {
-            printf("Le robot n'a pas encore pris d'allée \n");
+            //printf("Le robot %d n'a pas encore pris d'allée \n", id_robot);
             if(objet.aisleR != -1)
             {
                 if(pthread_mutex_trylock(&allee_etageres[objet.aisleR - 1]->mutex) == 0)
                 {
                     //si l'allee droite est dispo : on prend l'allee droite
-                    printf("Le robot va se rendre dans l'allée %d \n", objet.aisleR);
+                    printf("Le robot %d va se rendre dans l'allée %d \n", id_robot, objet.aisleR);
                     rbt->prochaineAllee = objet.aisleR;
                     rbt->cheminAllee[0] = objet.waypointsR[0];
                     rbt->cheminAllee[1] = objet.waypointsR[1];
@@ -175,7 +175,7 @@ int chercheObjet(robot* rbt, ItemPath objet)
                 if(pthread_mutex_trylock(&allee_etageres[objet.aisleL - 1]->mutex) == 0)
                 {
                     // si l'allée gauche est dispo : on prend l'allee gauche
-                    printf("Le robot va se rendre dans l'allée %d \n", objet.aisleL);
+                    printf("Le robot %d va se rendre dans l'allée %d \n", id_robot, objet.aisleL);
                     rbt->prochaineAllee = objet.aisleL;
                     rbt->cheminAllee[0] = objet.waypointsL[0];
                     rbt->cheminAllee[1] = objet.waypointsL[1];
@@ -196,7 +196,9 @@ int chercheObjet(robot* rbt, ItemPath objet)
             if(Deplacement_elementaire(rbt, rbt->cheminAllee[0]) == 0)
             {
                 // on deblocke la mutex de l'entrée
-                pthread_mutex_unlock(&allee_etageres[allee_choisie-1]->mutex);
+                //pthread_mutex_unlock(&allee_etageres[allee_choisie-1]->mutex);
+                printf("Le robot %d vient de debloquer la mutex %d \n", id_robot, allee_choisie);
+                pthread_mutex_unlock(&s_principale[1+2*(allee_choisie-1)]->mutex);
                 rbt->numero_wayPoint = 1;
             }
         }

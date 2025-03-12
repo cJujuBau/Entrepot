@@ -76,8 +76,8 @@ void setupEnvironment() {
     }
 
     creer_robot(&rbt,0,1);
-    // creer_robot(&rbt2,1,0);
-    // creer_robot(&rbt3,2,0);
+    creer_robot(&rbt2,8,0);
+    creer_robot(&rbt3,9,0);
 }
 
 void processEvents()
@@ -106,8 +106,8 @@ void render()
     }
 
     sfRenderWindow_drawCircleShape(window, rbt->cercle, NULL);
-    // sfRenderWindow_drawCircleShape(window, rbt2->cercle, NULL);
-    // sfRenderWindow_drawCircleShape(window, rbt3->cercle, NULL);
+    sfRenderWindow_drawCircleShape(window, rbt2->cercle, NULL);
+    sfRenderWindow_drawCircleShape(window, rbt3->cercle, NULL);
 
     sfRenderWindow_display(window);
 }
