@@ -27,18 +27,18 @@ bool terminateProgram=false;
 //                         x = - 70/100 * (yMM + 200)
 //                         y = 26/100 *(xMM + 1700)
 
-#define gainX -70 // 0.70 But we multiply by 100 to avoid float
-#define offsetX 200
+#define gainX  1650// 0.70 But we multiply by 100 to avoid float
+#define offsetX 2500
 
-#define gainY 24  // 0.26 But we multiply by 10 to avoid float
-#define offsetY 1700
+#define gainY 1000  // 0.26 But we multiply by 10 to avoid float
+#define offsetY 3800
 
 #define coeffCorrection 100
 
 void transformPosition(Position position){
     int x = position->x;
-    position->x = gainX * (position->y + offsetX) / coeffCorrection;
-    position->y = gainY * (x + offsetY) / coeffCorrection;
+    position->x = - gainX * (position->y - offsetX) / offsetX;
+    position->y = - gainY * (x - offsetY) / offsetY;
 }
 
 
@@ -115,11 +115,22 @@ void getPositionMarvelmind(RobotMarvelmind robotMarvelmind, Position position){
                 getPositionFromMarvelmindHedgeByAddress(hedge, &positionMM, robotMarvelmind->address);
         
                 if (positionMM.ready==true && positionMM.x < MAX_COORD && positionMM.x > MIN_COORD){
-                    position->x= positionMM.x;
-                    position->y= positionMM.y;
 
-                    DEBUG_PRINT("getPositionMarvelmind: x=%d, y=%d\n", position->x, position->y);
-                    transformPosition(position);
+
+                    // position->x= 2000 - positionMM.x;
+                    // position->y= 1300 - positionMM.y;
+
+                    //DEBUG_PRINT("getPositionMarvelmind: x=%d, y=%d\n", position->x, position->y);
+                    
+                    if (position->x == 0 || position->y == 0){
+                        position->x= 2000 - positionMM.x;
+                        position->y= 1300 - positionMM.y;
+                    } else {
+                        position->x = 0.8 * (2000 - positionMM.x) + (1-0.8) * position->x;
+                        position->y = 0.8 * (1300 - positionMM.y) + (1-0.8) * position->y;
+                        // 0.8 = coefAverageMovingFilter
+                    }
+                   
                     
                     hedge->haveNewValues_=false;
                 }
@@ -147,6 +158,7 @@ int encodePosition(char buffer[20], const Position position){
 // Thread function to get and send position to the server and serial port
 void *threadGetAndSendPositionMarvelmind(void *arg){
     Position position = malloc(sizeof(struct Position));
+    Position positionSever = malloc(sizeof(struct Position));
     int size = -1;
     char buffer[20];
 
@@ -156,7 +168,7 @@ void *threadGetAndSendPositionMarvelmind(void *arg){
         DEBUG_PRINT("threadGetAndSendPositionMarvelmind: x=%d, y=%d\n", position->x, position->y);
 
         size = encodePosition(buffer, position);
-        //DEBUG_PRINT("threadGetAndSendPositionMarvelmind: sentBuffer=%s\n", buffer);
+        DEBUG_PRINT("threadGetAndSendPositionMarvelmind: sentBuffer=%s\n", buffer);
         
         // Serial write
         if (raspiOn){
@@ -165,7 +177,14 @@ void *threadGetAndSendPositionMarvelmind(void *arg){
             pthread_mutex_unlock(&mutexSerialPort); 
         }
         
-        // Network write
+        // // Network write
+        
+        positionSever->x = position->x;
+        positionSever->y = position->y;
+        transformPosition(positionSever); // Changement de repere
+        size = encodePosition(buffer, positionSever);
+        
+        
         if (sendToServer(sd, id, buffer, size) < 0){
             perror("threadGetAndSendPositionMarvelmind: sendToServer failed");
             getPositionON = 0;
@@ -174,6 +193,7 @@ void *threadGetAndSendPositionMarvelmind(void *arg){
 
     DEBUG_PRINT("threadGetAndSendPositionMarvelmind: End of thread\n");
     free(position);
+    free(positionSever);
     
     return NULL;
 }
