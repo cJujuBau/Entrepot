@@ -1,5 +1,7 @@
 #include "../include/Robot.h"
 
+extern int xMM, yMM;
+
 Robot::Robot(Point pos, Motor& motorLeft, Motor& motorRight, MotorController& motorControllerLeft, 
              MotorController& motorControllerRight, InverseMotorModel& inverseMotorModel, double theta) 
 : pos(pos), motorLeft(motorLeft), motorRight(motorRight), theta(theta), v(0), w(0), Vg(0), Vd(0),
@@ -51,6 +53,12 @@ void Robot::changeRef(const Point pos_ref){
 }
 
 void Robot::readMarvelmind(){
+  pos.x = xMM;
+  pos.y = yMM;
+}
+
+void Robot::readGyro(float gyroTheta){
+  this->theta = gyroTheta;
 }
 
 double Robot::getTheta(){
@@ -63,6 +71,10 @@ double Robot::getV(){
 
 double Robot::getW(){
   return this->w; 
+}
+
+Point Robot::getPos(){
+  return this->pos;
 }
 
 void Robot::init(){

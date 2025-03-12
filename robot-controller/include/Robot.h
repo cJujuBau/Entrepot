@@ -11,12 +11,14 @@ public:
           InverseMotorModel& inverseMotorModel, double theta);
     void updateState();
     void readMarvelmind();
+    void readGyro(float gyroTheta);
     void changeRef(const Point pos_ref);
     void init();
 
     double getTheta();
     double getV();
     double getW();
+    Point getPos();
 
     Motor& motorLeft;
     Motor& motorRight;

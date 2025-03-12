@@ -18,6 +18,7 @@ void MotorController::setControlledVoltage(const double refSpeed, const double a
     if (integralError < lim_min_integ) integralError = lim_min_integ;
 
     double result = integralError + proportional;
+    //double result = proportional;
     this->controlledVoltage = constrain(result, lim_min, lim_max);
 }
 
