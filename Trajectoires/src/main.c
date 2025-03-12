@@ -32,6 +32,10 @@ int main()
 
     if (!window) return 1; // Vérification si la fenêtre a bien été créée
 
+    int etapeDeposeR1 = 0;
+    int etapeDeposeR2 = 0;
+    int etapeDeposeR3 = 0;
+
     while (sfRenderWindow_isOpen(window)) 
     {
         processEvents();
@@ -53,23 +57,43 @@ int main()
 
         // }
 
-        if(chercheObjet(1,rbt,objet1) == 0)
+        if(!etapeDeposeR1)
         {
-            printf("Rbt1 a trouvé l'objet ! \n");
-            //clean();
-            //return 0;
+            if(chercheObjet(1,rbt,objet1) == 0)
+            {
+                printf("Rbt1 a trouvé l'objet ! \n");
+                etapeDeposeR1 = 1;
+            }
         }
-        if(chercheObjet(2,rbt2,objet2) == 0)
+        else
         {
-            printf("Rbt2 a trouvé l'objet ! \n");
-            //clean();
-            //return 0;
+            retourCyclePrincipal(1,rbt);
         }
-        if(chercheObjet(3,rbt3,objet2) == 0)
+
+        if(!etapeDeposeR2)
         {
-            printf("Rbt3 a trouvé l'objet ! \n");
-            //clean();
-            //return 0;
+            if(chercheObjet(2,rbt2,objet2) == 0)
+            {
+                printf("Rbt2 a trouvé l'objet ! \n");
+                etapeDeposeR2 = 1;
+            }
+        }
+        else
+        {
+            retourCyclePrincipal(2,rbt2);
+        }
+
+        if(!etapeDeposeR3)
+        {
+            if(chercheObjet(3,rbt3,objet2) == 0)
+            {
+                printf("Rbt3 a trouvé l'objet ! \n");
+                etapeDeposeR3 = 1;
+            }
+        }
+        else
+        {
+            retourCyclePrincipal(3,rbt3);
         }
 
         // if(deplacementSection(rbt3,0) == 0)

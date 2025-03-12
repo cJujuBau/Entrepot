@@ -213,7 +213,50 @@ int chercheObjet(int id_robot, robot* rbt, ItemPath objet)
         }
     }
     return 1;
+}
 
+int retourCyclePrincipal(int id_robot, robot* rbt)
+{
+    // si le robot est encore dans l'allée
+    if(rbt->isInAisle)
+    {
+        // si le robot est au dernier waypoint de l'allée
+        // printf("Le robot %d est dans l'allée %d \n", id_robot, rbt->prochaineAllee);
+        if(rbt->numero_wayPoint == 2)
+        {
+            printf("Le robot %d doit revenir au centre de l'allée \n", id_robot);
+            if(Deplacement_elementaire(rbt, rbt->cheminAllee[0]) == 0)
+            {
+                rbt->numero_wayPoint = 1;
+            }
+        }
+        else if(rbt->numero_wayPoint == 1)
+        {
+            int entreeAllee = 1 + 2*((rbt->prochaineAllee)-1);
+            // le robot ne peut pas sortir de l'allee : il n'a pas encore la mutex à l'entrée
+            if(!rbt->hasMutex)
+            {
+                // on essaye de prendre la mutex de l'entrée de l'allée
+                if(pthread_mutex_trylock(&s_principale[entreeAllee]->mutex) == 0)
+                {
+                    printf("Le robot %d vient de prendre la mutex de l'entrée de l'allée %d \n", id_robot, rbt->prochaineAllee);
+                    rbt->hasMutex = 1;
+                    // rbt->prochaineAllee = -1; A faire plus tard
+                    //pthread_mutex_unlock(&allee_etageres[rbt->prochaineAllee-1]->mutex);
+                }
+            }
+            else
+            {
+                printf("Le robot se dirige vers l'entrée de l'allée \n");
+                if(Deplacement_elementaire(rbt, s_principale[entreeAllee]->point_section[0]) == 0)
+                {
+                    printf("Le robot %d vient de revenir sur le cycle principal \n", id_robot);
+                    pthread_mutex_unlock(&allee_etageres[rbt->prochaineAllee-1]->mutex);
+                }
+            }
+        }
+    }
+    return 1;
 }
 
 void testAvancer()

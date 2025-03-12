@@ -33,6 +33,12 @@ typedef struct Allee
     //int estDispo;
 } Allee;
 
+typedef struct
+{
+    pthread_mutex_t mutex;
+    //int estDispo;
+} Bac;
+
 extern section_cycle_principal* s_principale[]; // Déclaration de la variable externe
 extern Allee* allee_etageres[NOMBRE_ALLEES]; // Définition de la variable externe
 
