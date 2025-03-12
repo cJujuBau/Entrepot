@@ -11,6 +11,7 @@ int main()
 {
     creer_cycle_principal();    
     setupEnvironment();
+    //pthread_mutex_lock(&s_principale[3]->mutex);
 
     if (!window) return 1; // Vérification si la fenêtre a bien été créée
 
@@ -19,11 +20,25 @@ int main()
         processEvents();
         render();
         //testAvancer();
-        if(deplacementSection(rbt,2) == 0)
+
+        if(deplacementSection(rbt2,0) == 0)
         {
-            printf("On est arrivé ! \n");
-            clean();
-            return 0;
+            printf("On est arrivé robot 2 ! \n");
+            //clean();
+            //return 0;
+        }
+        if(deplacementSection(rbt,9) == 0)
+        {
+            printf("On est arrivé robot 1 ! \n");
+            //clean();
+            //return 0;
+        }
+
+        if(deplacementSection(rbt3,0) == 0)
+        {
+            printf("On est arrivé robot 3 ! \n");
+            //clean();
+            //return 0;
         }
         sleep(0.5);
         compteur++; // compteur utilisé pour logger pas trop souvent

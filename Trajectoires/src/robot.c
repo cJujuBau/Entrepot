@@ -11,6 +11,8 @@
 #include <pthread.h>
 
 robot* rbt = NULL; // Définition de la variable externe
+robot* rbt2 = NULL;
+robot* rbt3 = NULL;
 
 extern section_cycle_principal* s_principale[];
 
@@ -18,21 +20,25 @@ void creer_robot(robot** r, int n_section, int n_wayPoint) {
     *r = malloc(sizeof(robot));
     if (*r == NULL) {
         perror("Erreur malloc robot");
+        free(*r);
         exit(EXIT_FAILURE);
     }
 
     (*r)->pos = malloc(sizeof(sfVector2f));
     if ((*r)->pos == NULL) {
         perror("Erreur malloc pos");
+        free((*r)->pos);
         free(*r);
         exit(EXIT_FAILURE);
     }
-    rbt->cercle = sfCircleShape_create();
-    actualiseSectionWayPointRobot(rbt,n_section,n_wayPoint);
+    (*r)->cercle = sfCircleShape_create();
+    actualiseSectionWayPointRobot(*r,n_section,n_wayPoint);
     sfVector2f pos = s_principale[n_section]->point_section[n_wayPoint];
-    actualisePositionRobot(rbt,pos);
-    sfCircleShape_setRadius(rbt->cercle, 15);
-    sfCircleShape_setFillColor(rbt->cercle,sfRed);
+    actualisePositionRobot(*r,pos);
+    pthread_mutex_lock(&s_principale[n_section]->mutex);
+    sfCircleShape_setRadius((*r)->cercle, 15);
+    sfCircleShape_setFillColor((*r)->cercle,sfRed);
+    (*r)->hasMutex = 0;
 }
 
 void actualisePositionRobot(robot* rbt, sfVector2f nouvellePosition)
@@ -68,8 +74,8 @@ int Deplacement_elementaire(robot* rbt, sfVector2f posfinale)
 
 int deplacementSection(robot* rbt, int numero_section_objectif)
 {
-    printf("On veut se rendre à la section %d \n", numero_section_objectif);
-    printf("On est à la section %d et au wayPoint %d \n", rbt->numero_section, rbt->numero_wayPoint);
+    //printf("On veut se rendre à la section %d \n", numero_section_objectif);
+    //printf("On est à la section %d et au wayPoint %d \n", rbt->numero_section, rbt->numero_wayPoint);
 
     int resultat_deplacement;
     int indice_prochaine_section;
@@ -92,7 +98,7 @@ int deplacementSection(robot* rbt, int numero_section_objectif)
     }
     else
     {
-        printf("On est à la fin d'une section \n");
+        //printf("On est à la fin d'une section \n");
         // Si on est à l'endroit auquel on veut se rendre
         if(rbt->numero_section == numero_section_objectif)
         {
@@ -109,7 +115,7 @@ int deplacementSection(robot* rbt, int numero_section_objectif)
             if (resultat_deplacement == 0)
             {
                 actualiseSectionWayPointRobot(rbt, indice_prochaine_section, indice_prochain_wayPoint);
-                printf("On vient d'arriver à la section %d, on va lacher la mutex de la section precedente \n", indice_prochaine_section);
+                //printf("On vient d'arriver à la section %d, on va lacher la mutex de la section precedente \n", indice_prochaine_section);
                 pthread_mutex_unlock(&s_principale[derniere_section]->mutex);
                 rbt->hasMutex = 0;
                 derniere_section = indice_prochaine_section;
@@ -119,7 +125,7 @@ int deplacementSection(robot* rbt, int numero_section_objectif)
         {
             if (pthread_mutex_trylock(&s_principale[indice_prochaine_section]->mutex) == 0)
             {
-                printf("On vient de prendre la mutex de la section %d \n", indice_prochaine_section);
+                //printf("On vient de prendre la mutex de la section %d \n", indice_prochaine_section);
                 rbt->hasMutex = 1;
             }
         }

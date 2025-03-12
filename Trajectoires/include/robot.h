@@ -14,6 +14,8 @@ typedef struct robot
 } robot;
 
 extern robot* rbt; // Déclaration de la variable externe
+extern robot* rbt2; // Déclaration de la variable externe
+extern robot* rbt3; // Déclaration de la variable externe
 
 void creer_robot(robot** r, int n_section, int n_wayPoint);
 void actualisePositionRobot(robot* rbt, sfVector2f nouvellePosition);
