@@ -124,7 +124,7 @@ int main(int argc, char const *argv[])
     
 
     // Initialization of the marvelmind
-    DEBUG_PRINT("Initialization of the marvelmind\n");
+    DEBUG_PRINT("Initialization of the marvelmind on address %d\n", addressMM);
     CHECK_NULL(semMM = malloc(sizeof(sem_t)), "main: malloc(sizeof(sem_t))");
     robotMarvelmind = malloc(sizeof(struct RobotMarvelmind));
     initRobotMarvelmind(robotMarvelmind, PORT_MARVELMIND, addressMM);

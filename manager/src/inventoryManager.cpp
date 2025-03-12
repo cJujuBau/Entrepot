@@ -30,7 +30,7 @@ struct Item {
     int id;
     std::string name;
     int quantity;
-    int aisle; // Nul d'avoir ca dans cette structure 
+    int rack; // Nul d'avoir ca dans cette structure 
     int row;
 };
 
@@ -122,7 +122,7 @@ public:
         items.clear();
 
         for (const auto& obj : inventoryJson) {
-            items.push_back({obj["id"], obj["name"], obj["quantity"], obj["row"], obj["aisle"] });
+            items.push_back({obj["id"], obj["name"], obj["quantity"], obj["row"], obj["rack"] });
         }
     }
 
