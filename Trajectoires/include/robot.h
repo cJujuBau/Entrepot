@@ -11,7 +11,17 @@ typedef struct robot
     int numero_section;
     int numero_wayPoint;
     int hasMutex; // 1 si le robot a pris la mutex de la section où il veut se rendre, 0 sinon
+    int prochaineAllee;
+    int isInAisle;
 } robot;
+
+typedef struct {
+    int id;
+    int rack, row;
+    int quantity;
+    int aisleL, aisleR;
+    sfVector2f *waypointsL, *waypointsR;
+} ItemPath;
 
 extern robot* rbt; // Déclaration de la variable externe
 extern robot* rbt2; // Déclaration de la variable externe
@@ -23,5 +33,6 @@ void actualiseSectionWayPointRobot(robot* rbt, int n_section, int n_wayPoint);
 int Deplacement_elementaire(robot* rbt, sfVector2f posfinale);
 int deplacementSection(robot* rbt, int numero_section_objectif);
 void testAvancer();
+int chercheObjet(robot* rbt, ItemPath objet);
 
 #endif

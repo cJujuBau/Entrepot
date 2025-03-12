@@ -5,6 +5,7 @@
 #include <SFML/Graphics.h>
 
 section_cycle_principal* s_principale[2 * NOMBRE_ETAGERES + 4]; // Définition de la variable externe
+Allee* allee_etageres[NOMBRE_ALLEES]; // Définition de la variable externe
 
 section_cycle_principal *creer_section(int nombre_points, int* points) {
     section_cycle_principal *section = malloc(sizeof(section_cycle_principal));
@@ -87,6 +88,33 @@ void detruire_cycle_principal()
             pthread_mutex_destroy(&s_principale[i]->mutex); // Détruire le mutex
             free(s_principale[i]->point_section);
             free(s_principale[i]);
+        }
+    }
+}
+
+void creer_allees()
+{
+    for (int i = 0; i < NOMBRE_ALLEES; i++) {
+        allee_etageres[i] = malloc(sizeof(Allee));
+        if (allee_etageres[i] == NULL) {
+            perror("Erreur malloc allee");
+            free(allee_etageres[i]);
+            exit(EXIT_FAILURE);
+        }
+        // Initialiser le mutex
+        if (pthread_mutex_init(&allee_etageres[i]->mutex, NULL) != 0) {
+            printf("Erreur: Impossible d'initialiser le mutex.\n");
+            free(allee_etageres[i]);
+            exit(EXIT_FAILURE);
+        }
+    }
+}
+void detruire_allee()
+{
+    for (int i = 0; i < NOMBRE_ALLEES; i++) {
+        if (allee_etageres[i] != NULL) {
+            pthread_mutex_destroy(&allee_etageres[i]->mutex); // Détruire le mutex
+            free(allee_etageres[i]);
         }
     }
 }

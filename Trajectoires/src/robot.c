@@ -15,6 +15,7 @@ robot* rbt2 = NULL;
 robot* rbt3 = NULL;
 
 extern section_cycle_principal* s_principale[];
+extern Allee* allee_etageres[];
 
 void creer_robot(robot** r, int n_section, int n_wayPoint) {
     *r = malloc(sizeof(robot));
@@ -39,6 +40,8 @@ void creer_robot(robot** r, int n_section, int n_wayPoint) {
     sfCircleShape_setRadius((*r)->cercle, 15);
     sfCircleShape_setFillColor((*r)->cercle,sfRed);
     (*r)->hasMutex = 0;
+    (*r)->prochaineAllee = -1; // pas d'allée choisie
+    (*r)->isInAisle = 0; // pas encore dans l'allée
 }
 
 void actualisePositionRobot(robot* rbt, sfVector2f nouvellePosition)
@@ -65,7 +68,7 @@ int Deplacement_elementaire(robot* rbt, sfVector2f posfinale)
     {
         sfVector2f nouvellePosition = {(rbt->pos)->x + VITESSE_ROBOT * ((posfinale.x - posRobot.x)/d), (rbt->pos)->y + VITESSE_ROBOT * ((posfinale.y - posRobot.y)/d)}; 
         if(compteur  % 100 == 0)
-        printf("Nouvelle position du robot : (%f,%f) \n", nouvellePosition.x, nouvellePosition.y);
+        //printf("Nouvelle position du robot : (%f,%f) \n", nouvellePosition.x, nouvellePosition.y);
         actualisePositionRobot(rbt,nouvellePosition);
         return 1;
     }
@@ -131,6 +134,67 @@ int deplacementSection(robot* rbt, int numero_section_objectif)
         }
     }
     return 1;
+}
+
+int chercheObjet(robot* rbt, ItemPath objet)
+{
+    // le robot n'est as encore dans l'allee
+    if(!rbt->isInAisle)
+    {
+        // le robot a deja pris la mutex pour se deplacer vers une allee
+        if(rbt->prochaineAllee != -1)
+        {
+            //printf("Le robot a déjà pris l'allée %d \n", rbt->prochaineAllee);
+            int entreeAllee = 1 + 2*(rbt->prochaineAllee-1);
+            if(deplacementSection(rbt,entreeAllee) == 0)
+            {
+                printf("On vient d'arriver devant l'allée %d \n", rbt->prochaineAllee);
+                rbt->isInAisle = 1;
+                rbt->numero_wayPoint = 0; // wayPoint DANS L'ALLEE
+            }
+        }
+        // si le robot n'a pas encore pris une allee
+        else
+        {
+            printf("Le robot n'a pas encore pris d'allée \n");
+            if(objet.aisleR != -1)
+            {
+                if(pthread_mutex_trylock(&allee_etageres[objet.aisleR - 1]->mutex) == 0)
+                {
+                    //si l'allee droite est dispo : on prend l'allee droite
+                    printf("Le robot va se rendre dans l'allée %d \n", objet.aisleR);
+                    rbt->prochaineAllee = objet.aisleR;
+                    return 1;
+                }
+            }
+            if(objet.aisleL != -1)
+            {
+                if(pthread_mutex_trylock(&allee_etageres[objet.aisleL - 1]->mutex) == 0)
+                {
+                    // si l'allée gauche est dispo : on prend l'allee gauche
+                    printf("Le robot va se rendre dans l'allée %d \n", objet.aisleL);
+                    rbt->prochaineAllee = objet.aisleL;
+                    return 1;
+                }
+            }
+        }
+        return 1;
+    }
+    // si le robot a déjà atteint l'entrée de l'allée
+    // else
+    // {
+    //     int allee_choisie = rbt->prochaineAllee;
+    //     if(rbt->numero_section == 0)
+    //     {
+    //         // le robot vient d'arriver au premier waypoint de l'allée
+    //         if(Deplacement_elementaire(rbt, objet.waypointsL[0]) == 0)
+    //         {
+                
+    //         }
+    //     }
+    // }
+    return 1;
+
 }
 
 void testAvancer()

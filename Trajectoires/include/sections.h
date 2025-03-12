@@ -27,9 +27,19 @@ typedef struct section_cycle_principal
     pthread_mutex_t mutex;
 } section_cycle_principal;
 
+typedef struct Allee
+{
+    pthread_mutex_t mutex;
+    //int estDispo;
+} Allee;
+
 extern section_cycle_principal* s_principale[]; // Déclaration de la variable externe
+extern Allee* allee_etageres[NOMBRE_ALLEES]; // Définition de la variable externe
 
 section_cycle_principal *creer_section(int nombre_points, int* points);
 void creer_cycle_principal();
+void creer_allees();
+void detruire_cycle_principal();
+void detruire_allee();
 
 #endif
