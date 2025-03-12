@@ -28,4 +28,5 @@ private:
     Point pos;
     double theta;
     double v, w;
+    double Vg, Vd;
 };

@@ -2,17 +2,17 @@
 
 Robot::Robot(Point pos, Motor& motorLeft, Motor& motorRight, MotorController& motorControllerLeft, 
              MotorController& motorControllerRight, InverseMotorModel& inverseMotorModel, double theta) 
-: pos(pos), motorLeft(motorLeft), motorRight(motorRight), theta(theta), v(0), w(0), 
+: pos(pos), motorLeft(motorLeft), motorRight(motorRight), theta(theta), v(0), w(0), Vg(0), Vd(0),
   motorControllerLeft(motorControllerLeft), motorControllerRight(motorControllerRight), 
   inverseMotorModel(inverseMotorModel) {}
 
 void Robot::updateState(){
-    double Vg = motorLeft.getSpeed();
-    double Vd = motorRight.getSpeed();
+    Vg = motorLeft.getSpeed();
+    Vd = motorRight.getSpeed();
     //Serial.print("Vg = "); Serial.print(Vg); Serial.print("; Vd = "); Serial.println(Vd);
 
-    v = (Vg + Vd)/2;
-    w = (Vd - Vg)/(2 * WIDTH);
+    v = (Vg + Vd)/2.;
+    w = (Vd - Vg)/(2. * WIDTH);
     //Serial.print("v = "); Serial.print(v); Serial.print("; w = "); Serial.println(w);
 
     double dx = cos(theta) * v - LENGTH * sin(theta) * w;
@@ -28,13 +28,16 @@ void Robot::changeRef(const Point pos_ref){
     inverseMotorModel.setReference(pos_ref, pos);
     inverseMotorModel.update(theta);
 
-    double Vd = inverseMotorModel.getVdStar();
-    double Vg = inverseMotorModel.getVgStar();
-    if (Vg > 300) Vg = 300;
-    if (Vd > 300) Vd = 300;
+
+    // robot alim is unable to handle too high values
+    //if (Vg > 350) Vg = 350.;
+    //if (Vd > 350) Vd = 350.;
+    //if (Vg < -350) Vg = -350.;
+    //if (Vd < -350) Vd = -350.;
+
     //Serial.println(Vg); Serial.println(Vd);
-    motorControllerLeft.setControlledVoltage(Vg);
-    motorControllerRight.setControlledVoltage(Vd);
+    motorControllerLeft.setControlledVoltage(inverseMotorModel.getVgStar(), Vg);
+    motorControllerRight.setControlledVoltage(inverseMotorModel.getVdStar(), Vd);
     
     motorLeft.setVoltage(motorControllerLeft.getControlledVoltage());
     motorRight.setVoltage(motorControllerRight.getControlledVoltage());

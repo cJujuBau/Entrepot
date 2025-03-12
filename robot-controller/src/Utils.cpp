@@ -14,7 +14,3 @@ int convertToPWM(const int value) {
 float myAbs(const float value){
     return (value >= 0) ? value : -value;
 }
-
-float deg2rad(const float angle){
-    return angle * PI/180;
-}

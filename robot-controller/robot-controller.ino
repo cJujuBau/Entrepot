@@ -8,19 +8,19 @@ const double SPEED = 150.0; // mm.s-1
 const double ROT_SPEED = PI/4.; // rad.s-1
 
 const double Km = 1./50.;
-const double Ki = 0.;
+const double Ki = 0.1;
 
-const double Kx = 1.;
-const double Ky = 1.;
+const double Kx = 2.;
+const double Ky = 2.;
 
 const Point pos_init = Point(0, 0);
-const Point pos_ref_1 = Point(300, 600);
+const Point pos_ref_1 = Point(500, 0);
 const Point pos_ref_2 = Point(50, 300);
 const Point pos_ref_3 = Point(200, -300);
 const Point pos_ref_4 = Point(500, -300);
 
 
-const double theta_init = 0;
+const double theta_init =  0;
 
 Motor motorLeft(37, 36, 8, 19, 38, BACKWARD);
 Motor motorRight(34, 35, 12, 18, 31, FORWARD);
@@ -65,18 +65,17 @@ void loop() {
   unsigned long currentTime = millis();
   unsigned long elapsedTime = currentTime - startTime;
 
-  if (elapsedTime <= 16000){
-    robot.updateState();
+  robot.updateState();
 
-    if (elapsedTime <= 15000) {
-      (forwardOnce++ > 0) ? : Serial.println("Forward");
-      robot.changeRef(pos_ref_1);
+  if (elapsedTime <= 15000) {
+    (forwardOnce++ > 0) ? : Serial.println("Forward");
+    robot.changeRef(pos_ref_1);
 
-    } else if (elapsedTime <= 15000) {
-      (stopOnce++ > 0) ? : Serial.println("Stop");
-      robot.changeRef(pos_init);
-    }
-    //Serial.print("Vg = "); Serial.print(motorLeft.getSpeed()); Serial.print("; Vd = "); Serial.println(motorRight.getSpeed());
-    //Serial.print("v = "); Serial.print(robot.getV()); Serial.print("; w = "); Serial.print(robot.getW()); Serial.print("; theta = "); Serial.println(robot.getTheta());
+  } else if (elapsedTime <= 15000) {
+    (stopOnce++ > 0) ? : Serial.println("Stop");
+    robot.changeRef(pos_init);
   }
+  //Serial.print("Vg = "); Serial.print(motorLeft.getSpeed()); Serial.print("; Vd = "); Serial.println(motorRight.getSpeed());
+  //Serial.print("v = "); Serial.print(robot.getV()); Serial.print("; w = "); Serial.print(robot.getW()); Serial.print("; theta = "); Serial.println(robot.getTheta());
+
 }

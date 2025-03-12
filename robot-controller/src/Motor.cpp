@@ -59,8 +59,7 @@ void Motor::setVoltage(const float voltage) {
 void Motor::applyVoltage(){
     float voltage = u;
 
-    if (myAbs(voltage) < 1) { voltage = 0; }
-    if (myAbs(voltage) < 2) { voltage *= 2; }
+    if (myAbs(voltage) < 2.5) { voltage = 0; }
 
     if (voltage > 0) {
         digitalWrite(BI2, LOW);
