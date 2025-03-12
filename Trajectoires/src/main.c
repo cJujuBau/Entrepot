@@ -15,17 +15,17 @@ int main()
     setupEnvironment();
 
     sfVector2f* cheminObjet1 = malloc(2*sizeof(sfVector2f));
-    cheminObjet1[0] = (sfVector2f) {LONGUEUR_ENVIRONNEMENT - LARGEUR_ETAGERE - LARGEUR_ALLEE / 2, LONGUEUR_ETAGERE / 2};
-    cheminObjet1[1] = (sfVector2f) {LONGUEUR_ENVIRONNEMENT - LARGEUR_ETAGERE, LONGUEUR_ETAGERE / 2};
+    cheminObjet1[0] = (sfVector2f) {LONGUEUR_ENVIRONNEMENT - ECART_LONGUEUR - LARGEUR_ETAGERE - LARGEUR_ALLEE / 2, 5 * LONGUEUR_ETAGERE / 8};
+    cheminObjet1[1] = (sfVector2f) {LONGUEUR_ENVIRONNEMENT - ECART_LONGUEUR - LARGEUR_ETAGERE, 5 * LONGUEUR_ETAGERE / 8};
     ItemPath objet1 = {0, 1, 2, 1, 1, -1, cheminObjet1, NULL};
 
     sfVector2f* chemin1Objet2 = malloc(2*sizeof(sfVector2f));
-    chemin1Objet2[0] = (sfVector2f) {ECART_LONGUEUR + LARGEUR_BAC + LARGEUR_ALLEE / 2, LONGUEUR_ETAGERE / 4};
-    chemin1Objet2[1] = (sfVector2f) {ECART_LONGUEUR + LARGEUR_BAC + LARGEUR_ALLEE , LONGUEUR_ETAGERE / 4};
+    chemin1Objet2[0] = (sfVector2f) {ECART_LONGUEUR + LARGEUR_BAC + LARGEUR_ALLEE / 2, LONGUEUR_ETAGERE / 8};
+    chemin1Objet2[1] = (sfVector2f) {ECART_LONGUEUR + LARGEUR_BAC + LARGEUR_ALLEE , LONGUEUR_ETAGERE / 8};
 
     sfVector2f* chemin2Objet2 = malloc(2*sizeof(sfVector2f));
-    chemin2Objet2[0] = (sfVector2f) {ECART_LONGUEUR + 2*LARGEUR_BAC + 3*LARGEUR_ALLEE / 2, LONGUEUR_ETAGERE / 4};
-    chemin2Objet2[1] = (sfVector2f) {ECART_LONGUEUR + 2*LARGEUR_BAC + LARGEUR_ALLEE , LONGUEUR_ETAGERE / 4};
+    chemin2Objet2[0] = (sfVector2f) {ECART_LONGUEUR + 2*LARGEUR_BAC + 3*LARGEUR_ALLEE / 2, LONGUEUR_ETAGERE / 8};
+    chemin2Objet2[1] = (sfVector2f) {ECART_LONGUEUR + 2*LARGEUR_BAC + LARGEUR_ALLEE , LONGUEUR_ETAGERE / 8};
     ItemPath objet2 = {1, 2, 4, 1, 3, 2, chemin1Objet2, chemin2Objet2};
 
     pthread_mutex_lock(&allee_etageres[1]->mutex);
@@ -53,7 +53,7 @@ int main()
 
         // }
 
-        if(chercheObjet(rbt,objet2) == 0)
+        if(chercheObjet(rbt,objet1) == 0)
         {
             printf("On a trouvé l'objet ! \n");
             //clean();

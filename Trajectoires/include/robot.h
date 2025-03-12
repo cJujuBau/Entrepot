@@ -13,6 +13,7 @@ typedef struct robot
     int hasMutex; // 1 si le robot a pris la mutex de la section où il veut se rendre, 0 sinon
     int prochaineAllee;
     int isInAisle;
+    sfVector2f *cheminAllee;
 } robot;
 
 typedef struct {

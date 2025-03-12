@@ -42,6 +42,7 @@ void creer_robot(robot** r, int n_section, int n_wayPoint) {
     (*r)->hasMutex = 0;
     (*r)->prochaineAllee = -1; // pas d'allée choisie
     (*r)->isInAisle = 0; // pas encore dans l'allée
+    (*r)->cheminAllee = malloc(2*sizeof(sfVector2f));
 }
 
 void actualisePositionRobot(robot* rbt, sfVector2f nouvellePosition)
@@ -164,6 +165,8 @@ int chercheObjet(robot* rbt, ItemPath objet)
                     //si l'allee droite est dispo : on prend l'allee droite
                     printf("Le robot va se rendre dans l'allée %d \n", objet.aisleR);
                     rbt->prochaineAllee = objet.aisleR;
+                    rbt->cheminAllee[0] = objet.waypointsR[0];
+                    rbt->cheminAllee[1] = objet.waypointsR[1];
                     return 1;
                 }
             }
@@ -174,6 +177,8 @@ int chercheObjet(robot* rbt, ItemPath objet)
                     // si l'allée gauche est dispo : on prend l'allee gauche
                     printf("Le robot va se rendre dans l'allée %d \n", objet.aisleL);
                     rbt->prochaineAllee = objet.aisleL;
+                    rbt->cheminAllee[0] = objet.waypointsL[0];
+                    rbt->cheminAllee[1] = objet.waypointsL[1];
                     return 1;
                 }
             }
@@ -181,18 +186,30 @@ int chercheObjet(robot* rbt, ItemPath objet)
         return 1;
     }
     // si le robot a déjà atteint l'entrée de l'allée
-    // else
-    // {
-    //     int allee_choisie = rbt->prochaineAllee;
-    //     if(rbt->numero_section == 0)
-    //     {
-    //         // le robot vient d'arriver au premier waypoint de l'allée
-    //         if(Deplacement_elementaire(rbt, objet.waypointsL[0]) == 0)
-    //         {
-                
-    //         }
-    //     }
-    // }
+    else
+    {
+        int allee_choisie = rbt->prochaineAllee;
+        // wayPoint à 0 signifie qu'il est entre l'entrée de l'allée et le premier wayPoint de l'allée
+        if(rbt->numero_wayPoint == 0)
+        {
+            // le robot vient d'arriver au premier waypoint de l'allée
+            if(Deplacement_elementaire(rbt, rbt->cheminAllee[0]) == 0)
+            {
+                // on deblocke la mutex de l'entrée
+                pthread_mutex_unlock(&allee_etageres[allee_choisie-1]->mutex);
+                rbt->numero_wayPoint = 1;
+            }
+        }
+        else if(rbt->numero_wayPoint == 1)
+        {
+            // le robot vient d'arriver au deuxième waypoint de l'allée
+            if(Deplacement_elementaire(rbt, rbt->cheminAllee[1]) == 0)
+            {
+                rbt->numero_wayPoint = 2;
+                return 0;
+            }
+        }
+    }
     return 1;
 
 }
