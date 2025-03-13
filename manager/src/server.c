@@ -51,7 +51,7 @@ void *threadConnexionClient(void *arg)
         if (nbChar > 0)
         {
             buff[nbChar] = '\0';
-            DEBUG_PRINT("%s%d received : '%s'\n", indent, idClient, buff);
+            // DEBUG_PRINT("%s%d received : '%s'\n", indent, idClient, buff);
             processStringReceived(buff, nbChar, sd); // Voir si n met un check
         }
         else if (nbChar == 0)
@@ -71,6 +71,7 @@ void *threadConnexionClient(void *arg)
     }
 
     close(sd);
+    robotsPositions[idClient]->sd = -1;
     DEBUG_PRINT("%sthreadServer: Thread finished for client %d on file descriptor %d\n", indent, idClient, sd);
     DEBUG_PRINT("\n###############################\n");
     DEBUG_PRINT("Remaining number of clients connected: %d\n", --nbClient);
@@ -79,6 +80,35 @@ void *threadConnexionClient(void *arg)
     pthread_exit(NULL);
     
     return NULL;
+}
+
+void * testEnvoiStdin(void *arg){
+    char buffer[MAXCAR];
+    int idRobot;
+    char cmd;
+    int x, y;
+
+    DEBUG_PRINT("Thread stdin launched\n");
+    while (1)
+    {
+        printf("Enter a reference position (idRobot-r:x,y;) : ");
+        fgets(buffer, MAXCAR, stdin);
+        
+        sscanf(buffer, "%d-%c:%d,%d;", &idRobot, &cmd, &x, &y);
+        if (cmd == 'r' && idRobot > 0 && idRobot < MAX_ROBOTS && robotsPositions[idRobot]->sd != -1) {
+            
+            robotsPositions[idRobot]->xRef = x;
+            robotsPositions[idRobot]->yRef = y;
+            robotsPositions[idRobot]->oRef = 0;
+            CHECK(sendPosRef(idRobot), "Envoi stdin : sendPosRef");
+        }
+        else {
+            printf("Invalid command (bad id Robot, socket unopen or bad format)\n");
+        }
+        
+    }
+    return NULL;
+
 }
 
 void  initNetworkServer(int *se)
@@ -138,7 +168,9 @@ int processStringReceived(const char *buffer, const int size, int sd)
     char commande;
     char args[size-3];
     sscanf(buffer, "%d-%c:%s", &idRobot, &commande, args);
-    DEBUG_PRINT("idRobot=%d, commande=%c, args=%s\n", idRobot, commande, args);
+
+    // DEBUG_PRINT("idRobot=%d, commande=%c, args=%s\n", idRobot, commande, args);
+
     if (commande == 'p') {
         sscanf(args, "%d,%d;", &robotsPositions[idRobot]->x, &robotsPositions[idRobot]->y);
         //sendPosRef(idRobot);
@@ -150,7 +182,7 @@ int processStringReceived(const char *buffer, const int size, int sd)
         obstacleDetected(x, y, o);
     }
     
-    printRobot(idRobot);
+    // printRobot(idRobot);
     return 0;
 }
 

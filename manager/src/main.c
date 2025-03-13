@@ -63,7 +63,7 @@ void bye()
 
 int main()
 {
-    pthread_t tidPause, tidServer;
+    pthread_t tidPause, tidServer, tidStdin;
 
     atexit(bye); 
     
@@ -88,11 +88,13 @@ int main()
     // Create threads
     CHECK(pthread_create(&tidPause, NULL, threadWaitOrder, NULL), "pthread_create(tidPause)");
     CHECK(pthread_create(&tidServer, NULL, threadServer, NULL), "pthread_create(tidServer)");
+    CHECK(pthread_create(&tidStdin, NULL, testEnvoiStdin, NULL), "pthread_create(tidStdin)");
 
     
     // Waiting for threads to finish
     pthread_join(tidPause, NULL);
     pthread_join(tidServer, NULL);
+    pthread_join(tidStdin, NULL);
     
     return EXIT_SUCCESS;
 }

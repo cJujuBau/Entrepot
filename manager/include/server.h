@@ -44,7 +44,7 @@ extern int se;
 /*                    F U N C T I O N   P R O T O T Y P E S                 */
 /* ------------------------------------------------------------------------ */
 
-
+void * testEnvoiStdin(void *arg);
 void *threadConnexionClient(void *arg);
 void *threadServer(void *arg);
 void closeNetworkServer(int se);
