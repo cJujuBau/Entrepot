@@ -4,8 +4,12 @@
 
 #include <SFML/Graphics.h>
 
+enum {etapeDeplacementAvantCollecte, etapeCollecte, etapeRetourCyclePrincipal, etapeDelacementAvantDepose, etapeDepose};
+
 typedef struct robot
 {
+    int id_robot;
+    int etape;
     sfVector2f* pos;
     sfCircleShape* cercle; 
     int numero_section;
@@ -18,6 +22,7 @@ typedef struct robot
 
 typedef struct {
     int id;
+    int bac;
     int rack, row;
     int quantity;
     int aisleL, aisleR;
@@ -28,13 +33,13 @@ extern robot* rbt; // Déclaration de la variable externe
 extern robot* rbt2; // Déclaration de la variable externe
 extern robot* rbt3; // Déclaration de la variable externe
 
-void creer_robot(robot** r, int n_section, int n_wayPoint);
+void creer_robot(robot** r, int n_section, int n_wayPoint, int id);
 void actualisePositionRobot(robot* rbt, sfVector2f nouvellePosition);
 void actualiseSectionWayPointRobot(robot* rbt, int n_section, int n_wayPoint);
 int Deplacement_elementaire(robot* rbt, sfVector2f posfinale);
 int deplacementSection(robot* rbt, int numero_section_objectif);
 void testAvancer();
-int chercheObjet(int id_robot, robot* rbt, ItemPath objet);
-int retourCyclePrincipal(int id_robot, robot* rbt);
+int chercheObjet(robot* rbt, ItemPath objet);
+int retourCyclePrincipal(robot* rbt);
 
 #endif

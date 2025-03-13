@@ -17,7 +17,7 @@ int main()
     sfVector2f* cheminObjet1 = malloc(2*sizeof(sfVector2f));
     cheminObjet1[0] = (sfVector2f) {LONGUEUR_ENVIRONNEMENT - ECART_LONGUEUR - LARGEUR_ETAGERE - LARGEUR_ALLEE / 2, 5 * LONGUEUR_ETAGERE / 8};
     cheminObjet1[1] = (sfVector2f) {LONGUEUR_ENVIRONNEMENT - ECART_LONGUEUR - LARGEUR_ETAGERE, 5 * LONGUEUR_ETAGERE / 8};
-    ItemPath objet1 = {0, 1, 2, 1, 1, -1, cheminObjet1, NULL};
+    ItemPath objet1 = {0, 1, 1, 2, 1, 1, -1, cheminObjet1, NULL};
 
     sfVector2f* chemin1Objet2 = malloc(2*sizeof(sfVector2f));
     chemin1Objet2[0] = (sfVector2f) {ECART_LONGUEUR + LARGEUR_BAC + LARGEUR_ALLEE / 2, LONGUEUR_ETAGERE / 8};
@@ -26,82 +26,119 @@ int main()
     sfVector2f* chemin2Objet2 = malloc(2*sizeof(sfVector2f));
     chemin2Objet2[0] = (sfVector2f) {ECART_LONGUEUR + 2*LARGEUR_BAC + 3*LARGEUR_ALLEE / 2, LONGUEUR_ETAGERE / 8};
     chemin2Objet2[1] = (sfVector2f) {ECART_LONGUEUR + 2*LARGEUR_BAC + LARGEUR_ALLEE , LONGUEUR_ETAGERE / 8};
-    ItemPath objet2 = {1, 2, 4, 1, 3, 2, chemin1Objet2, chemin2Objet2};
+    ItemPath objet2 = {1, 2, 2, 4, 1, 3, 2, chemin1Objet2, chemin2Objet2};
 
     //pthread_mutex_lock(&allee_etageres[0]->mutex);
 
     if (!window) return 1; // Vérification si la fenêtre a bien été créée
 
-    int etapeDeposeR1 = 0;
-    int etapeDeposeR2 = 0;
-    int etapeDeposeR3 = 0;
-
     while (sfRenderWindow_isOpen(window)) 
     {
         processEvents();
         render();
-        //testAvancer();
 
-        // if(deplacementSection(rbt2,2) == 0)
-        // {
-        //     printf("On est arrivé robot 2 ! \n");
-        //     //clean();
-        //     //return 0;
-        // }
-
-        // if(deplacementSection(rbt,9) == 0)
-        // {
-        //     printf("On est arrivé robot 1 ! \n");
-        //     //clean();
-        //     //return 0;
-
-        // }
-
-        if(!etapeDeposeR1)
+        if(rbt->etape == etapeDeplacementAvantCollecte)
         {
-            if(chercheObjet(1,rbt,objet1) == 0)
+            if(deplacementSection(rbt,0) == 0)
             {
-                printf("Rbt1 a trouvé l'objet ! \n");
-                etapeDeposeR1 = 1;
+                rbt->etape = etapeCollecte;
             }
         }
-        else
+        else if(rbt->etape == etapeCollecte)
         {
-            retourCyclePrincipal(1,rbt);
-        }
-
-        if(!etapeDeposeR2)
-        {
-            if(chercheObjet(2,rbt2,objet2) == 0)
+            if(chercheObjet(rbt,objet2) == 0)
             {
-                printf("Rbt2 a trouvé l'objet ! \n");
-                etapeDeposeR2 = 1;
+                printf("Rbt1 a trouvé l'objet 2 ! \n");
+                rbt->etape = etapeRetourCyclePrincipal;
             }
         }
-        else
+        else if(rbt->etape == etapeRetourCyclePrincipal)
         {
-            retourCyclePrincipal(2,rbt2);
-        }
-
-        if(!etapeDeposeR3)
-        {
-            if(chercheObjet(3,rbt3,objet2) == 0)
+            if(retourCyclePrincipal(rbt) == 0)
             {
-                printf("Rbt3 a trouvé l'objet ! \n");
-                etapeDeposeR3 = 1;
+               printf("Rbt1 est de retour sur le cycle principal ! \n");
+               rbt->etape = etapeDelacementAvantDepose;
             }
         }
-        else
+        else if(rbt->etape == etapeDelacementAvantDepose)
         {
-            retourCyclePrincipal(3,rbt3);
+            int section_avant_bac = NOMBRE_SECTIONS_PRINCIPALES - 4 / objet2.bac;
+            printf("Le robot 1 doit se rendre à la section %d \n", section_avant_bac);
+            if(deplacementSection(rbt,section_avant_bac) == 0)
+            {
+                printf("Rbt1 est devant le bac %d ! \n", objet2.bac);
+                rbt->etape = etapeDepose;
+            }
         }
 
-        // if(deplacementSection(rbt3,0) == 0)
-        // {
-        //     printf("On est arrivé robot 3 ! \n");
-        //     //clean();
-        //     //return 0;
-        // }
+        if(rbt2->etape == etapeDeplacementAvantCollecte)
+        {
+            if(deplacementSection(rbt2,0) == 0)
+            {
+                rbt2->etape = etapeCollecte;
+            }
+        }
+        else if(rbt2->etape == etapeCollecte)
+        {
+            if(chercheObjet(rbt2,objet2) == 0)
+            {
+                printf("Rbt2 a trouvé l'objet 2 ! \n");
+                rbt2->etape = etapeRetourCyclePrincipal;
+            }
+        }
+        else if(rbt2->etape == etapeRetourCyclePrincipal)
+        {
+            if(retourCyclePrincipal(rbt2) == 0)
+            {
+               printf("Rbt2 est de retour sur le cycle principal ! \n");
+               rbt2->etape = etapeDelacementAvantDepose;
+            }
+        }
+        else if(rbt2->etape == etapeDelacementAvantDepose)
+        {
+            int section_avant_bac = NOMBRE_SECTIONS_PRINCIPALES - 4 / objet2.bac;
+            printf("Le robot 2 doit se rendre à la section %d \n", section_avant_bac);
+            if(deplacementSection(rbt2,section_avant_bac) == 0)
+            {
+                printf("Rbt2 est devant le bac %d ! \n", objet2.bac);
+                rbt2->etape = etapeDepose;
+            }
+        }
+
+        if(rbt3->etape == etapeDeplacementAvantCollecte)
+        {
+            if(deplacementSection(rbt3,0) == 0)
+            {
+                rbt3->etape = etapeCollecte;
+            }
+        }
+        else if(rbt3->etape == etapeCollecte)
+        {
+            if(chercheObjet(rbt3,objet1) == 0)
+            {
+                printf("Rbt3 a trouvé l'objet 1 ! \n");
+                rbt3->etape = etapeRetourCyclePrincipal;
+            }
+        }
+        else if(rbt3->etape == etapeRetourCyclePrincipal)
+        {
+            if(retourCyclePrincipal(rbt3) == 0)
+            {
+               printf("Rbt3 est de retour sur le cycle principal ! \n");
+               rbt3->etape = etapeDelacementAvantDepose;
+            }
+        }
+        else if(rbt3->etape == etapeDelacementAvantDepose)
+        {
+            int section_avant_bac = NOMBRE_SECTIONS_PRINCIPALES - 4 / objet1.bac;
+            printf("Le robot 3 doit se rendre à la section %d \n", section_avant_bac);
+            if(deplacementSection(rbt3,section_avant_bac) == 0)
+            {
+                printf("Rbt3 est devant le bac %d ! \n", objet2.bac);
+                rbt3->etape = etapeDepose;
+            }
+        }
+
         sleep(0.5);
         compteur++; // compteur utilisé pour logger pas trop souvent
     }
