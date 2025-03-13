@@ -141,7 +141,6 @@ int main(int argc, char const *argv[])
 
     if (raspiOn) CHECK_T(pthread_create(&threadReadArduino, NULL, threadReceptionSerie, NULL), "main: pthread_create(&threadReadArduino)");
 
-    
     // Waiting for the end of threads 
     pthread_join(threadMarvelmind, NULL);
     pthread_join(threadReadReseau, NULL);

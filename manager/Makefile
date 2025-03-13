@@ -3,9 +3,11 @@ CFLAGS= -Wall
 CFLAGS+=-I./include
 
 
-LIBS=-lpthread
-LIBS+=-lrt
-LIBS+=-ljansson
+LIBS=-lpthread 
+LIBS+=-lrt 
+LIBS+=-ljansson 
+LIBS+=-lcsfml-window -lcsfml-graphics -lcsfml-system 
+LIBS+=-lm
 
 ifeq ($(D), 1)
 	CFLAGS +=-DDEBUG
@@ -14,15 +16,35 @@ endif
 
 all: bin/main bin/inventoryManager
 
+###########################
+#		   ARNAUD		  #
+###########################
+bin/main.o: src/main.c 
+	gcc $(CFLAGS) -c $^ -o $@ 
+
+bin/robot.o:  src/robot.c 
+	gcc $(CFLAGS) -c $^ -o $@ 
+
+bin/sections.o:  src/sections.c 
+	gcc $(CFLAGS) -c $^ -o $@ 
+
+bin/environnement.o:  src/environnement.c 
+	gcc $(CFLAGS) -c $^ -o $@ 
+
+
+bin/main : bin/sections.o bin/main.o bin/robot.o bin/environnement.o bin/server.o bin/order.o
+	gcc $(CFLAGS) $^ -o $@ $(LIBS)
+
+
 
 ###########################
 #		   MAIN			  #
 ###########################
 
-bin/main: bin/main.o bin/server.o bin/order.o
+bin/mainRomain: bin/mainRomain.o bin/server.o bin/order.o
 	gcc $(CFLAGS) $^ -o $@ $(LIBS)
 
-bin/main.o: src/main.c
+bin/mainRomain.o: src/mainRomain.c
 	gcc $(CFLAGS) -c $^ -o $@ $(LIBS)
 
 
@@ -35,7 +57,7 @@ bin/server: src/server.c
 	gcc $(CFLAGS) $^ -o $@ $(LIBS)
 
 bin/server.o: src/server.c
-	gcc $(CFLAGS) -c $^ -o $@ $(LIBS)
+	gcc $(CFLAGS) -c $^ -o $@ 
 
 
 
@@ -52,10 +74,10 @@ bin/inventoryManager: src/inventoryManager.cpp
 ###########################
 
 bin/order.o: src/order.c
-	gcc $(CFLAGS) -c $^ -o $@ $(LIBS) -lsfml-graphics -lsfml-window -lsfml-system
+	gcc $(CFLAGS) -c $^ -o $@ -lsfml-system
 
 bin/orderTest: src/order.c
-	gcc $(CFLAGS) -DDEBUG -DTEST_ORDER  $^ -o $@ $(LIBS) -lsfml-graphics -lsfml-window -lsfml-system
+	gcc $(CFLAGS) -DDEBUG -DTEST_ORDER  $^ -o $@ $(LIBS) 
 
 ###########################
 #		 CLEAN			  #

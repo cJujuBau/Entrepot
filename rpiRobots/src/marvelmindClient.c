@@ -33,13 +33,13 @@ bool terminateProgram=false;
 #define gainY 1000  // 0.26 But we multiply by 10 to avoid float
 #define offsetY 3800
 
-#define coeffCorrection 100
 
 void transformPosition(Position position){
     int x = position->x;
     position->x = - gainX * (position->y - offsetX) / offsetX;
     position->y = - gainY * (x - offsetY) / offsetY;
 }
+
 
 
 void CtrlHandler(int signum)

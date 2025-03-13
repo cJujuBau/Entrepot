@@ -37,6 +37,7 @@
 #define LARGEUR_ALLEE (( LONGUEUR_ENVIRONNEMENT - 2 * ECART_LONGUEUR - LARGEUR_ETAGERE ) / (NOMBRE_ETAGERES - 1) - LARGEUR_ETAGERE)
 #endif
 
+#define NB_ITEMS_PER_ROBOT 2
 #define NB_ITEMS_PAR_ALLEE 4
 #define LONGUEUR_ETAGERE_PAR_ITEM (LONGUEUR_ETAGERE/NB_ITEMS_PAR_ALLEE)
 
@@ -49,16 +50,25 @@
 
 typedef struct {
     int id;
+    int bac;
     int rack, row;
     int quantity;
     int aisleL, aisleR;
     sfVector2f *waypointsL, *waypointsR;
 } ItemPath;
 
+typedef struct OrdersElementary
+{
+    int nbOrdersElementary;
+    int sizeOrdersElementary;
+    ItemPath **items;
+} *OrdersElementary;
+
 /* ------------------------------------------------------------------------ */
 /*                        G L O B A L   V A R I A B L E S                   */
 /* ------------------------------------------------------------------------ */
 
+extern OrdersElementary ordersElementaryGlobal;
 
 /* ------------------------------------------------------------------------ */
 /*                    F U N C T I O N   P R O T O T Y P E S                 */
@@ -66,11 +76,19 @@ typedef struct {
 
 void newOrder();
 void *threadWaitOrder(void *arg);
-void processOdrer(char *orderStr);
+void processOrder(char *orderStr);
 void constructAisle(ItemPath *order, int nbItems);
 void constructWaypoint(ItemPath *order, int nbItems);
 
 int extractIdQty(char *orderStr, int **idItemsOrder, int **qtyItemsOrder);
 ItemPath *load_inventory(const char *path, int nbItems, int *idItemsOrder, int *qtyItemsOrder);
+
+int divideOrder(ItemPath *order, int nbItems, int ***idItemsOrderElementary);
+int attributeBac(ItemPath *order, int nbItems);
+
+void addOrdersToOrdersGlobal(int **idItemsOrderElementary, int nbOrdersElementary, ItemPath *order);
+void removeOrderFromOrdersGlobal(int index);
+void printOrdersElementary();
+void freeOrdersElementary();
 
 #endif

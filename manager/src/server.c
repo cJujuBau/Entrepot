@@ -199,8 +199,19 @@ int sendPosRef(int id) // peut etre envoyer un robotPosition
     return send(robotsPositions[id]->sd, buffer, strlen(buffer), 0);
 }
 
+#define gainX  1650// 0.70 But we multiply by 100 to avoid float
+#define offsetX 2500
 
+#define gainY 1000  // 0.26 But we multiply by 10 to avoid float
+#define offsetY 3800
 
+int sendPosRefFromSimu(int id) // peut etre envoyer un robotPosition
+{
+    char buffer[25];
+    sprintf(buffer, "r:%d,%d,%d;",  offsetY * (robotsPositions[id]->yRef-1)/gainY , offsetX *(robotsPositions[id]->xRef - 1)/gainX , robotsPositions[id]->oRef);
+    DEBUG_PRINT("sendPosRef: buffer=%s\n", buffer);
+    return send(robotsPositions[id]->sd, buffer, strlen(buffer), 0);
+}
 
 void initRobots()
 {
