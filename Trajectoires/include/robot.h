@@ -4,7 +4,7 @@
 
 #include <SFML/Graphics.h>
 
-enum {etapeDeplacementAvantCollecte, etapeCollecte, etapeRetourCyclePrincipal, etapeCollecte2, etapeRetourCyclePrincipal2, etapeDeplacementAvantDepose, etapeDepose};
+enum {etapeDeplacementAvantCollecte, etapeCollecte, etapeRetourCyclePrincipal, etapeCollecte2, etapeCollecteDansMemeAllee, etapeRetourCyclePrincipal2, etapeDeplacementAvantDepose, etapeDepose};
 
 typedef struct robot
 {
@@ -18,6 +18,7 @@ typedef struct robot
     int prochaineAllee;
     int isInAisle;
     sfVector2f *cheminAllee;
+    int nombreObjetsAChercher;
 } robot;
 
 typedef struct {
@@ -42,5 +43,8 @@ void testAvancer();
 int chercheObjet(robot* rbt, ItemPath* objet);
 int retourCyclePrincipal(robot* rbt);
 int deposeBac(robot* rbt, int bac);
+int estDansLaMemeAllee(robot* rbt, ItemPath* objet);
+int chercheAutreObjetDansAllee(robot* rbt);
+void actualiseChemin(robot* rbt, sfVector2f* chemin);
 
 #endif

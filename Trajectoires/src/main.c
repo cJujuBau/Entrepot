@@ -42,14 +42,32 @@ void* update_robot(void* arg) {
         } else if (rbt->etape == etapeCollecte) {
             if (chercheObjet(rbt, o1) == 0) {
                 printf("Robot %d a trouvé l'objet 1 ! \n", rbt->id_robot);
-                rbt->etape = etapeRetourCyclePrincipal;
+                rbt->nombreObjetsAChercher--;
+                // si le robot est dans la même allée que l'objet 2
+                if(rbt->nombreObjetsAChercher > 0 && estDansLaMemeAllee(rbt, o2) != 3)
+                {
+                    rbt->etape = etapeCollecteDansMemeAllee;
+                }
+                else
+                {
+                    rbt->etape = etapeRetourCyclePrincipal;
+                }
             }
         } 
+        else if(rbt->etape == etapeCollecteDansMemeAllee)
+        {
+            if (chercheAutreObjetDansAllee(rbt) == 0) {
+                rbt->nombreObjetsAChercher--;
+                printf("Robot %d a trouvé l'objet 2 qui est dans le même allée, maintenant il faut retourner sur le cycle principal \n", rbt->id_robot);
+                rbt->etape = etapeRetourCyclePrincipal;
+            }
+        }
+
         else if (rbt->etape == etapeRetourCyclePrincipal) {
             if (retourCyclePrincipal(rbt) == 0) {
                 int numero_section_entree = 1 + 2 * (o2->aisleL - 1);
                 // si le robot peut encore aller chercher son euxième objet
-                if(numero_section_entree >= rbt->numero_section)
+                if(numero_section_entree >= rbt->numero_section && rbt->nombreObjetsAChercher > 0)
                 {
                     printf("Le robot va aller chercher l'objet 2 \n");
                     rbt->etape = etapeCollecte2;

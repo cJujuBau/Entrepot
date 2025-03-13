@@ -6,7 +6,7 @@
 
 sfRenderWindow *window = NULL; // Définition de la variable externe
 int compteur = 0; // Définition de la variable externe
-float VITESSE_ROBOT = 8.0; // Définition de la variable externe
+float VITESSE_ROBOT = 1.0; // Définition de la variable externe
 sfRectangleShape *etagere[NOMBRE_ETAGERES]; // Définition de la variable externe
 sfRectangleShape *bac[2]; // Définition de la variable externe
 

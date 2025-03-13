@@ -47,6 +47,7 @@ void creer_robot(robot** r, int n_section, int n_wayPoint, int id) {
         sfCircleShape_setFillColor((*r)->cercle,sfYellow);
     (*r)->id_robot = id;
     (*r)->etape = etapeDeplacementAvantCollecte;
+    (*r)->nombreObjetsAChercher = 2;
     (*r)->hasMutex = 0;
     (*r)->prochaineAllee = -1; // pas d'allée choisie
     (*r)->isInAisle = 0; // pas encore dans l'allée
@@ -224,6 +225,34 @@ int chercheObjet(robot* rbt, ItemPath* objet)
     return 1;
 }
 
+void actualiseChemin(robot* rbt, sfVector2f* chemin)
+{
+    rbt->cheminAllee = chemin;
+}
+
+// dans la fonction suivante, la liste du chemin à suivre pour aller récupérer l'objet est déjà dans le robot
+int chercheAutreObjetDansAllee(robot* rbt)
+{
+    // si le robot vient de récupérer le premier objet
+    if(rbt->numero_wayPoint == 2)
+    {
+        if(Deplacement_elementaire(rbt,rbt->cheminAllee[0]) == 0)
+        {
+            rbt->numero_wayPoint = 3;
+        }
+    }
+    if(rbt->numero_wayPoint == 3)
+    {
+        if(Deplacement_elementaire(rbt,rbt->cheminAllee[1]) == 0)
+        {
+            rbt->numero_wayPoint = 2; // on remet à 2 pour que retourCyclePrincipal s'exécute correctement
+            sleep(2);
+            return 0;
+        }
+    }
+    return 1;
+}
+
 int retourCyclePrincipal(robot* rbt)
 {
     // si le robot est encore dans l'allée
@@ -345,6 +374,26 @@ int deposeBac(robot* rbt, int bac)
     }
     return 1;
 }
+
+int estDansLaMeme(robot* rbt, ItemPath* objet)
+{
+    if(rbt->prochaineAllee == objet->aisleL)
+    { // 1 signifie que le robot est dans l'allée gauche
+        actualiseChemin(rbt, objet->waypointsL);
+        return 1;
+    }
+    else if(rbt->prochaineAllee == objet->aisleR)
+    { 
+        // 2 signifie que le robot est dans l'allée droite
+        actualiseChemin(rbt, objet->waypointsR);
+        return 2;
+    }
+    else
+    {
+        return 3; // le robot n'est pas dans l'allée
+    }
+}
+
 
 void testAvancer()
 {
