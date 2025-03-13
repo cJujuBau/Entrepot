@@ -1,72 +1,27 @@
-#include "MotorController.h"
-#include "Utils.h"
-#include <wiringPi.h>
+#include "../include/MotorController.h"
 
+MotorController::MotorController(const double Km, const double Ki) : Km(Km), Ki(Ki), controlledVoltage(0), integralError(0), lim_max(6.), lim_min(-6.) {}
 
-class MotorController {
-public:
-    MotorController(int BI1, int BI2, int PWMB, int base_direction);
-    void init();
-    void setSpeed(int speed);
-    void stop();
-    //int readSensor();
-    void setDirection(int directionToSet);
+void MotorController::setControlledVoltage(const double refSpeed, const double actualSpeed) {
+    const double error = refSpeed - actualSpeed;
+    double lim_max_integ = 0; double lim_min_integ = 0;
 
-private:
-    int motorSpeed;
-    int BI1; // BI1 pin number
-    int BI2; // BI2 pin number
-    int PWMB; // PWMB pin number
-    int base_direction; // rotation direction (1 for direct, -1 for inverse). Depends on the motor physical implementation
-    int direction;
-}; 
+    this->integralError += Ki * error * DT * MS_TO_S;
+    const double proportional = error * Km;
 
-MotorController::MotorController(int BI1, int BI2, int PWMB, int base_direction) : motorSpeed(0), BI1(BI1), BI2(BI2), PWMB(PWMB), base_direction(base_direction), direction(FORWARD) {}
+    if (lim_max > proportional) lim_max_integ = lim_max - proportional;
+    else lim_max_integ = 0.;
+    if (lim_min < proportional) lim_min_integ = lim_min - proportional;
+    else lim_min_integ = 0.;
 
-void MotorController::init() {
-    // Initialization code for the motors
-    wiringPiSetup();
-    pinMode(BI1, OUTPUT);
-    pinMode(BI2, OUTPUT);
-    pinMode(PWMB, PWM_OUTPUT);
+    if (integralError > lim_max_integ) integralError = lim_max_integ;
+    if (integralError < lim_min_integ) integralError = lim_min_integ;
+
+    double result = integralError + proportional;
+    //double result = proportional;
+    this->controlledVoltage = constrain(result, lim_min, lim_max);
 }
 
-void MotorController::setDirection(int directionToSet){
-    directionToSet *= base_direction; // Inverse la direction si le moteur est monté à l'envers
-
-    switch (directionToSet)
-    {
-    case FORWARD:
-        digitalWrite(BI2, LOW);
-        digitalWrite(BI1, HIGH);
-        break;
-    case BACKWARD:
-        digitalWrite(BI1, LOW);
-        digitalWrite8(BI2, HIGH);
-    default:
-        break;
-    }
-    direction = directionToSet;
+double MotorController::getControlledVoltage() {
+    return controlledVoltage;
 }
-
-void MotorController::setSpeed(int speed) {
-    motorSpeed = speed;
-    // Code to set the motor speed
-    pwmWrite(PWMB, convertToPWM(motorSpeed));
-}
-
-void MotorController::stop() {
-    setSpeed(0);
-}
-
-// // Function to read sensor data
-// int MotorController::readSensor() {
-//     // Setup wiringPi and set the pin mode
-//     wiringPiSetup();
-//     int pin = 0; // GPIO pin number (wiringPi pin number)
-//     pinMode(pin, INPUT);
-
-//     // Read the value from the pin
-//     int value = digitalRead(pin);
-//     return value;
-// }

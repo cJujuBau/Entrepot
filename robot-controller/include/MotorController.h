@@ -1,16 +1,20 @@
-#ifndef MOTORCONTROLLER_H
-#define MOTORCONTROLLER_H
+#pragma once
 
+#include "Motor.h"
+
+// Réalise la convertion d'une vitesse désirée pour le moteur en une tension
 class MotorController {
 public:
-    MotorController();
-    void init();
-    void setSpeed(int speed);
-    void stop();
+    MotorController(const double Km, const double Ki);
+    void setControlledVoltage(const double refSpeed, const double actualSpeed);
+    double getControlledVoltage();
 
 private:
-    int motorSpeed;
-    bool motorState;
-};
+    double Km;
+    double Ki;
+    double controlledVoltage;
+    double integralError;
 
-#endif // MOTORCONTROLLER_H
+    double lim_max;
+    double lim_min;
+};
