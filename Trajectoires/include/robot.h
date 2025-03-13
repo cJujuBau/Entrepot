@@ -4,7 +4,7 @@
 
 #include <SFML/Graphics.h>
 
-enum {etapeDeplacementAvantCollecte, etapeCollecte, etapeRetourCyclePrincipal, etapeDelacementAvantDepose, etapeDepose};
+enum {etapeDeplacementAvantCollecte, etapeCollecte, etapeRetourCyclePrincipal, etapeCollecte2, etapeRetourCyclePrincipal2, etapeDeplacementAvantDepose, etapeDepose};
 
 typedef struct robot
 {

@@ -6,16 +6,13 @@
 
 sfRenderWindow *window = NULL; // Définition de la variable externe
 int compteur = 0; // Définition de la variable externe
-float VITESSE_ROBOT = 3.0; // Définition de la variable externe
+float VITESSE_ROBOT = 8.0; // Définition de la variable externe
 sfRectangleShape *etagere[NOMBRE_ETAGERES]; // Définition de la variable externe
 sfRectangleShape *bac[2]; // Définition de la variable externe
 
 extern robot* rbt;
 extern robot* rbt2;
 extern robot* rbt3;
-
-sfRectangleShape* P1;
-sfRectangleShape* P2;
 
 void setupEnvironment() {
     sfVideoMode mode = {LONGUEUR_ENVIRONNEMENT, LARGEUR_ENVIRONNEMENT, 32}; // Définition de la variable mode
@@ -28,21 +25,6 @@ void setupEnvironment() {
     int longueurTotaleEtageres = LONGUEUR_ENVIRONNEMENT - 2 * ECART_LONGUEUR - LARGEUR_ETAGERE;
     float espacement = (float)longueurTotaleEtageres / (NOMBRE_ETAGERES - 1);
     //printf("Espacement : %f \n", espacement);
-
-    sfVector2f point1 = {441,350};
-    sfVector2f point2 = {511,350};
-    sfVector2f sizePetitCarre = {10,10};
-
-    P1  = sfRectangleShape_create();
-    P2  = sfRectangleShape_create();
-
-    sfRectangleShape_setSize(P1, sizePetitCarre);
-    sfRectangleShape_setFillColor(P1, sfYellow);
-    sfRectangleShape_setPosition(P1, point1);
-
-    sfRectangleShape_setSize(P2, sizePetitCarre);
-    sfRectangleShape_setFillColor(P2, sfYellow);
-    sfRectangleShape_setPosition(P2, point2);
 
     for (int i = 0; i < NOMBRE_ETAGERES; i++) {
         etagere[i] = sfRectangleShape_create();
@@ -94,9 +76,6 @@ void render()
 {
     sfRenderWindow_clear(window, sfBlack);
 
-    sfRenderWindow_drawRectangleShape(window, P1 , NULL);
-    sfRenderWindow_drawRectangleShape(window, P2 , NULL);
-    
     for (int i = 0; i < NOMBRE_ETAGERES; i++) {
         sfRenderWindow_drawRectangleShape(window, etagere[i], NULL);
     }

@@ -39,7 +39,12 @@ void creer_robot(robot** r, int n_section, int n_wayPoint, int id) {
     actualisePositionRobot(*r,pos);
     pthread_mutex_lock(&s_principale[n_section]->mutex);
     sfCircleShape_setRadius((*r)->cercle, 15);
-    sfCircleShape_setFillColor((*r)->cercle,sfRed);
+    if(id == 1)
+        sfCircleShape_setFillColor((*r)->cercle,sfBlue);
+    else if(id == 2)
+        sfCircleShape_setFillColor((*r)->cercle,sfRed);
+    else if(id == 3)
+        sfCircleShape_setFillColor((*r)->cercle,sfYellow);
     (*r)->id_robot = id;
     (*r)->etape = etapeDeplacementAvantCollecte;
     (*r)->hasMutex = 0;
@@ -68,7 +73,7 @@ int Deplacement_elementaire(robot* rbt, sfVector2f posfinale)
 {
     sfVector2f posRobot = *(rbt->pos);
     float d = distance(posRobot,posfinale);
-    if(d > 8) // 5
+    if(d > 5) // 5
     {
         sfVector2f nouvellePosition = {(rbt->pos)->x + VITESSE_ROBOT * ((posfinale.x - posRobot.x)/d), (rbt->pos)->y + VITESSE_ROBOT * ((posfinale.y - posRobot.y)/d)}; 
         if(compteur  % 100 == 0)
@@ -258,6 +263,7 @@ int retourCyclePrincipal(robot* rbt)
                     pthread_mutex_unlock(&allee_etageres[rbt->prochaineAllee-1]->mutex);
                     rbt->isInAisle = 0;
                     rbt->prochaineAllee = -1; // pas d'allée choisie
+                    rbt->hasMutex = 0; // test pour le problème de collision
                     return 0;
                 }
             }
@@ -324,7 +330,7 @@ int deposeBac(robot* rbt, int bac)
                 }
                 else
                 {
-                    printf("Le robot %d se dirige vers l'entrée de l'allée \n", rbt->id_robot);
+                    //printf("Le robot %d se dirige vers l'entrée de l'allée \n", rbt->id_robot);
                     if(Deplacement_elementaire(rbt, s_principale[entreeAllee]->point_section[0]) == 0)
                     {
                         printf("Le robot %d vient de revenir sur le cycle principal \n", rbt->id_robot);
