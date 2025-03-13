@@ -226,7 +226,7 @@ int retourCyclePrincipal(robot* rbt)
         // printf("Le robot %d est dans l'allée %d \n", id_robot, rbt->prochaineAllee);
         if(rbt->numero_wayPoint == 2)
         {
-            printf("Le robot %d doit revenir au centre de l'allée \n", rbt->id_robot);
+            //printf("Le robot %d doit revenir au centre de l'allée \n", rbt->id_robot);
             if(Deplacement_elementaire(rbt, rbt->cheminAllee[0]) == 0)
             {
                 rbt->numero_wayPoint = 1;
@@ -249,12 +249,87 @@ int retourCyclePrincipal(robot* rbt)
             }
             else
             {
-                printf("Le robot se dirige vers l'entrée de l'allée \n");
+                //printf("Le robot %d se dirige vers l'entrée de l'allée \n", rbt->id_robot);
                 if(Deplacement_elementaire(rbt, s_principale[entreeAllee]->point_section[0]) == 0)
                 {
                     printf("Le robot %d vient de revenir sur le cycle principal \n", rbt->id_robot);
                     pthread_mutex_unlock(&allee_etageres[rbt->prochaineAllee-1]->mutex);
+                    rbt->isInAisle = 0;
+                    rbt->prochaineAllee = -1; // pas d'allée choisie
                     return 0;
+                }
+            }
+        }
+    }
+    return 1;
+}
+
+int deposeBac(robot* rbt, int bac)
+{
+    int entreeAllee = NOMBRE_SECTIONS_PRINCIPALES - 4 / bac + 1;
+    // le robot ne s'est pas encore positionné devant le bac
+    if(!rbt->isInAisle)
+    {
+        // le robot a deja pris la mutex pour se deplacer vers une allee
+        if(rbt->prochaineAllee != -1)
+        {
+            //printf("Le robot a déjà pris l'allée %d \n", rbt->prochaineAllee);
+            if(deplacementSection(rbt,entreeAllee) == 0)
+            {
+                printf("Le robot %d vient d'arriver devant l'allée %d \n", rbt->id_robot, entreeAllee);
+                rbt->isInAisle = 1;
+                rbt->numero_wayPoint = 0; // wayPoint DANS L'ALLEE
+            }
+        }
+        // le robot doit prendre la mutex de l'allee
+        else
+        {
+            if(pthread_mutex_trylock(&allee_bacs[bac-1]->mutex) == 0)
+            {
+                printf("Le robot %d vient de prendre la mutex de l'allée du bac %d \n", rbt->id_robot, bac);
+                rbt->prochaineAllee = NOMBRE_ALLEES + bac;
+            }
+        }
+    } // le robot s'est déj positionné devant l'allée
+    else
+    {
+        // wayPoint à 0 signifie qu'il doit se rendre vers le bout de l'allée
+        if(rbt->numero_wayPoint == 0)
+        {
+            // si le robot vient d'arriver au bout de l'allée
+            if(Deplacement_elementaire(rbt,allee_bacs[bac-1]->boutAllee) == 0)
+            {
+                printf("Le robot %d vient d'arriver au bout de l'allée du bac %d \n", rbt->id_robot, bac);
+                pthread_mutex_unlock(&s_principale[entreeAllee]->mutex);
+                rbt->hasMutex = 0;
+                rbt->numero_wayPoint = 1;
+            }
+        }
+        else if(rbt->numero_wayPoint == 1)
+        {
+            // dans ce cas le robot doit revenir à l'entrée de l'allée
+            {
+                // le robot n'a pas encore pris la mutex pour retourner dans le cycle principal
+                if(!rbt->hasMutex)
+                {
+                    // on essaye de prendre la mutex de l'entrée de l'allée
+                    if(pthread_mutex_trylock(&s_principale[entreeAllee]->mutex) == 0)
+                    {
+                        printf("Le robot %d vient de prendre la mutex de l'entrée de l'allée %d \n", rbt->id_robot, entreeAllee);
+                        rbt->hasMutex = 1;
+                    }
+                }
+                else
+                {
+                    printf("Le robot %d se dirige vers l'entrée de l'allée \n", rbt->id_robot);
+                    if(Deplacement_elementaire(rbt, s_principale[entreeAllee]->point_section[0]) == 0)
+                    {
+                        printf("Le robot %d vient de revenir sur le cycle principal \n", rbt->id_robot);
+                        pthread_mutex_unlock(&allee_bacs[bac-1]->mutex);
+                        rbt->isInAisle = 0;
+                        rbt->prochaineAllee = -1; // pas d'allée choisie
+                        return 0;
+                    }
                 }
             }
         }

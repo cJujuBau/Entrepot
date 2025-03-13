@@ -36,16 +36,20 @@ typedef struct Allee
 typedef struct
 {
     pthread_mutex_t mutex;
+    sfVector2f boutAllee;
     //int estDispo;
 } Bac;
 
 extern section_cycle_principal* s_principale[]; // Déclaration de la variable externe
 extern Allee* allee_etageres[NOMBRE_ALLEES]; // Définition de la variable externe
+extern Bac* allee_bacs[2]; // Définition de la variable externe
 
 section_cycle_principal *creer_section(int nombre_points, int* points);
 void creer_cycle_principal();
 void creer_allees();
 void detruire_cycle_principal();
 void detruire_allee();
+void creer_bacs();
+void detruire_bacs();
 
 #endif

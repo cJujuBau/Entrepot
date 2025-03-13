@@ -41,5 +41,6 @@ int deplacementSection(robot* rbt, int numero_section_objectif);
 void testAvancer();
 int chercheObjet(robot* rbt, ItemPath objet);
 int retourCyclePrincipal(robot* rbt);
+int deposeBac(robot* rbt, int bac);
 
 #endif

@@ -6,6 +6,7 @@
 
 section_cycle_principal* s_principale[2 * NOMBRE_ETAGERES + 4]; // Définition de la variable externe
 Allee* allee_etageres[NOMBRE_ALLEES]; // Définition de la variable externe
+Bac* allee_bacs[2]; // Définition de la variable externe
 
 section_cycle_principal *creer_section(int nombre_points, int* points) {
     section_cycle_principal *section = malloc(sizeof(section_cycle_principal));
@@ -109,12 +110,43 @@ void creer_allees()
         }
     }
 }
+
 void detruire_allee()
 {
     for (int i = 0; i < NOMBRE_ALLEES; i++) {
         if (allee_etageres[i] != NULL) {
             pthread_mutex_destroy(&allee_etageres[i]->mutex); // Détruire le mutex
             free(allee_etageres[i]);
+        }
+    }
+}
+
+void creer_bacs()
+{
+    for (int i = 0; i < 2; i++) {
+        allee_bacs[i] = malloc(sizeof(Bac));
+        if (allee_bacs[i] == NULL) {
+            perror("Erreur malloc bac");
+            free(allee_bacs[i]);
+            exit(EXIT_FAILURE);
+        }
+        // Initialiser le mutex
+        if (pthread_mutex_init(&allee_bacs[i]->mutex, NULL) != 0) {
+            printf("Erreur: Impossible d'initialiser le mutex.\n");
+            free(allee_bacs[i]);
+            exit(EXIT_FAILURE);
+        }
+    }
+    allee_bacs[0]->boutAllee = (sfVector2f) {ECART_LONGUEUR + LARGEUR_BAC / 2, LARGEUR_ENVIRONNEMENT - LONGUEUR_BAC};
+    allee_bacs[1]->boutAllee = (sfVector2f) {ECART_LONGUEUR + LARGEUR_ALLEE + 3 * LARGEUR_BAC / 2, LARGEUR_ENVIRONNEMENT - LONGUEUR_BAC};
+}
+
+void detruire_bacs()
+{
+    for (int i = 0; i < 2; i++) {
+        if (allee_bacs[i] != NULL) {
+            pthread_mutex_destroy(&allee_bacs[i]->mutex); // Détruire le mutex
+            free(allee_bacs[i]);
         }
     }
 }

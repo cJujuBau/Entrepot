@@ -11,7 +11,8 @@
 int main() 
 {
     creer_cycle_principal();  
-    creer_allees();  
+    creer_allees(); 
+    creer_bacs(); 
     setupEnvironment();
 
     sfVector2f* cheminObjet1 = malloc(2*sizeof(sfVector2f));
@@ -63,11 +64,19 @@ int main()
         else if(rbt->etape == etapeDelacementAvantDepose)
         {
             int section_avant_bac = NOMBRE_SECTIONS_PRINCIPALES - 4 / objet2.bac;
-            printf("Le robot 1 doit se rendre à la section %d \n", section_avant_bac);
+            //printf("Le robot 1 doit se rendre à la section %d \n", section_avant_bac);
             if(deplacementSection(rbt,section_avant_bac) == 0)
             {
                 printf("Rbt1 est devant le bac %d ! \n", objet2.bac);
                 rbt->etape = etapeDepose;
+            }
+        }
+        else if(rbt->etape == etapeDepose)
+        {
+            if(deposeBac(rbt,objet2.bac) == 0)
+            {
+                printf("Rbt1 a déposé l'objet 2 ! \n");
+                rbt->etape = etapeDeplacementAvantCollecte;
             }
         }
 
@@ -97,11 +106,19 @@ int main()
         else if(rbt2->etape == etapeDelacementAvantDepose)
         {
             int section_avant_bac = NOMBRE_SECTIONS_PRINCIPALES - 4 / objet2.bac;
-            printf("Le robot 2 doit se rendre à la section %d \n", section_avant_bac);
+            //printf("Le robot 2 doit se rendre à la section %d \n", section_avant_bac);
             if(deplacementSection(rbt2,section_avant_bac) == 0)
             {
                 printf("Rbt2 est devant le bac %d ! \n", objet2.bac);
                 rbt2->etape = etapeDepose;
+            }
+        }
+        else if(rbt2->etape == etapeDepose)
+        {
+            if(deposeBac(rbt2,objet2.bac) == 0)
+            {
+                printf("Rbt2 a déposé l'objet 2 ! \n");
+                rbt2->etape = etapeDeplacementAvantCollecte;
             }
         }
 
@@ -131,11 +148,19 @@ int main()
         else if(rbt3->etape == etapeDelacementAvantDepose)
         {
             int section_avant_bac = NOMBRE_SECTIONS_PRINCIPALES - 4 / objet1.bac;
-            printf("Le robot 3 doit se rendre à la section %d \n", section_avant_bac);
+            //printf("Le robot 3 doit se rendre à la section %d \n", section_avant_bac);
             if(deplacementSection(rbt3,section_avant_bac) == 0)
             {
                 printf("Rbt3 est devant le bac %d ! \n", objet2.bac);
                 rbt3->etape = etapeDepose;
+            }
+        }
+        else if(rbt3->etape == etapeDepose)
+        {
+            if(deposeBac(rbt3,objet1.bac) == 0)
+            {
+                printf("Rbt3 a déposé l'objet 1 ! \n");
+                rbt3->etape = etapeDeplacementAvantCollecte;
             }
         }
 
