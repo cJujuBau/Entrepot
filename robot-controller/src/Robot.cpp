@@ -23,7 +23,7 @@ void Robot::updateState(){
     theta += w * DT * MS_TO_S;
     pos.x += DT * MS_TO_S * dx;
     pos.y += DT * MS_TO_S * dy;
-    Serial.print("theta = "); Serial.print(theta); Serial.print("; x = "); Serial.print(pos.x); Serial.print("; y = "); Serial.println(pos.y);
+    //Serial.print("theta = "); Serial.print(theta); Serial.print("; x = "); Serial.print(pos.x); Serial.print("; y = "); Serial.println(pos.y);
 }
 
 void Robot::changeRef(const Point pos_ref){

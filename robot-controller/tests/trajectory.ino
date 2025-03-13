@@ -5,10 +5,9 @@
 #include "include/Robot.h"
 #include "include/InverseMotorModel.h"
 #include "include/Motor.h"
+#include "include/Trajectory.h"
 #include "include/Utils.h"
 
-const double SPEED = 150.0; // mm.s-1
-const double ROT_SPEED = PI/4.; // rad.s-1
 const int MAX_CHIFFRE_POS = 10;
 
 const double Km = 1./50.;
@@ -22,10 +21,13 @@ const Point pos_ref = Point(1000, -1500);
 
 MeGyro gyro;
 
-const double theta_init =  PI;
+const double theta_init = 0;
 
 int xMM, yMM;
-float xRef, yRef, oRef;
+float xRef = 1000, yRef = -1500, oRef = PI;
+float xRef2 = 300, yRef2 = 400, oRef2 = -PI/3;
+float xRef3 = 0, yRef3 = 0, oRef3 = 0;
+
 
 Motor motorLeft(37, 36, 8, 19, 38, BACKWARD);
 Motor motorRight(34, 35, 12, 18, 31, FORWARD);
@@ -37,6 +39,7 @@ InverseMotorModel inverseMotorModel(Kx, Ky);
 
 Robot robot(pos_init, motorLeft, motorRight, motorControllerLeft, motorControllerRight, inverseMotorModel, theta_init);
 
+Trajectory trajectory;
 
 void getPosMM(){
   char strPos[MAX_CHIFFRE_POS+1] = {0};
@@ -151,6 +154,15 @@ static int rightOnce = 0;
 static int backwardOnce = 0;
 static int stopOnce = 0;
 
+static float ti;
+static float tf = 10000;
+static float tf2 = 20000;
+static float tf3 = 30000;
+static float qi[3], qf[3];
+
+static float x_traj, y_traj;
+static Point pos_traj;
+
 void loop() {
   static long timePrec = 0;
   while (millis() - timePrec < DT) {}
@@ -164,20 +176,50 @@ void loop() {
   //readMM();
   gyro.update();
   robot.readGyro(theta_init + (gyro.getAngleZ() * PI / 180.));
+  robot.updateState(); // A modifier: lorsqu'on mesure sur le gyro ou avec MM, il ne faudrait pas mettre à jour l'odométrie
+  // Sinon c'est comme si on mettait 2 fois à jour l'état du robot
   
-  robot.updateState();
-  if (elapsedTime <= 15000){
-        if (elapsedTime <= 15000) {
-      (forwardOnce++ > 0) ? : Serial.println("Forward");
-      robot.changeRef(pos_ref);
+
+  if (elapsedTime <= tf3){
+    if (elapsedTime <= tf) {
+        if (forwardOnce++ == 0){
+            Serial.print("xi (qi0) (avant assignation) = "); Serial.println(qi[0]);
+            qi[0] = robot.getPos().x; qi[1] = robot.getPos().y; qi[2] = robot.getTheta(); qi[3] = millis();
+            qf[0] = xRef; qf[1] = yRef; qf[2] = oRef; qf[3] = tf;
+            Serial.print("Pos_x Robot = "); Serial.println(robot.getPos().x);
+            Serial.print("xi (qi0) = "); Serial.println(qi[0]);
+
+            trajectory.computeParameters(qi, qf);
+            Serial.println();
+        }
+        
+      pos_traj = trajectory.computeTraj(robot.getPos().x, millis());
+      robot.changeRef(pos_traj);
   
-    } else if (elapsedTime <= 15000) {
-      (stopOnce++ > 0) ? : Serial.println("Stop");
-      robot.changeRef(pos_init);
+    } else if (elapsedTime <= tf2) {
+        if (leftOnce++ == 0){
+            qi[0] = robot.getPos().x; qi[1] = robot.getPos().y; qi[2] = robot.getTheta(); qi[3] = millis();
+            qf[0] = xRef2; qf[1] = yRef2; qf[2] = oRef2; qf[3] = tf2;
+            trajectory.computeParameters(qi, qf);
+            Serial.println();
+        }
+        pos_traj = trajectory.computeTraj(robot.getPos().x, millis());
+        robot.changeRef(pos_traj);
+    } else {
+        if (rightOnce++ == 0){
+            ti = millis();
+            qi[0] = robot.getPos().x; qi[1] = robot.getPos().y; qi[2] = robot.getTheta(); qi[3] = millis();
+            qf[0] = xRef3; qf[1] = yRef3; qf[2] = oRef3; qf[3] = tf3;
+            trajectory.computeParameters(qi, qf);
+            Serial.println();
+        }
+        pos_traj = trajectory.computeTraj(robot.getPos().x, millis());
+        robot.changeRef(pos_traj);
     }
+  //Serial.print("ti = "); Serial.print(ti); Serial.print("; tf = "); Serial.print(tf); Serial.print("; t = "); Serial.println(millis());
   //Serial.print("Vg = "); Serial.print(motorLeft.getSpeed()); Serial.print("; Vd = "); Serial.println(motorRight.getSpeed());
   //Serial.print("v = "); Serial.print(robot.getV()); Serial.print("; w = "); Serial.print(robot.getW()); Serial.print("; theta = "); Serial.println(robot.getTheta());
-
+   //Serial.print("x_traj = "); Serial.print(pos_traj.x); Serial.print("; y_traj = "); Serial.println(pos_traj.y);
   } else {
     motorLeft.setVoltage(0); motorRight.setVoltage(0);
     motorLeft.applyVoltage(); motorRight.applyVoltage();

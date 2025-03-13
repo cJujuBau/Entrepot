@@ -12,20 +12,20 @@ const double ROT_SPEED = PI/4.; // rad.s-1
 const int MAX_CHIFFRE_POS = 10;
 
 const double Km = 1./50.;
-const double Ki = 0.1;
+const double Ki = 0.05;
 
 const double Kx = 2.;
 const double Ky = 2.;
 
-const Point pos_init = Point(0, 0);
-const Point pos_ref = Point(1000, -1500);
+Point pos_init = Point();
+Point pos_ref = Point();
 
 MeGyro gyro;
 
-const double theta_init =  PI;
+const double theta_init = 0;
 
 int xMM, yMM;
-float xRef, yRef, oRef;
+float xRef = -1., yRef = -1., oRef = 0.;
 
 Motor motorLeft(37, 36, 8, 19, 38, BACKWARD);
 Motor motorRight(34, 35, 12, 18, 31, FORWARD);
@@ -107,6 +107,14 @@ void getPosRef() {
       strPos[index++] = recu; // Stocker le caractère
     }
   }
+  Serial.print("xRef=");
+  Serial.print(xRef);
+  Serial.print(", yRef=");
+  Serial.print(yRef);
+  Serial.print(", oRef=");
+  Serial.println(oRef);
+  
+  pos_ref = Point(xRef, yRef);
 }
 
 void readMM(){
@@ -140,16 +148,12 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(motorLeft.getVA()), onRisingEdge_MG, RISING);
   attachInterrupt(digitalPinToInterrupt(motorRight.getVA()), onRisingEdge_MD, RISING);
 
-  //while (robot.getPos().x == 0 and robot.getPos().y == 0){
-  //  readMM();
-  //}
+  while ((robot.getPos().x == 0 and robot.getPos().y == 0) or (xRef < 0 and yRef < 0)){
+    readMM();
+    //xRef = 1160.; yRef = 2700;
+    //pos_ref = Point(xRef, yRef);
+  }
 }
-
-static int forwardOnce = 0;
-static int leftOnce = 0;
-static int rightOnce = 0;
-static int backwardOnce = 0;
-static int stopOnce = 0;
 
 void loop() {
   static long timePrec = 0;
@@ -161,23 +165,16 @@ void loop() {
   unsigned long currentTime = millis();
   unsigned long elapsedTime = currentTime - startTime;
 
-  //readMM();
+  readMM();
   gyro.update();
   robot.readGyro(theta_init + (gyro.getAngleZ() * PI / 180.));
   
   robot.updateState();
-  if (elapsedTime <= 15000){
-        if (elapsedTime <= 15000) {
-      (forwardOnce++ > 0) ? : Serial.println("Forward");
-      robot.changeRef(pos_ref);
-  
-    } else if (elapsedTime <= 15000) {
-      (stopOnce++ > 0) ? : Serial.println("Stop");
-      robot.changeRef(pos_init);
-    }
+  Serial.println(distance(robot.getPos(), pos_ref));
+  if (distance(robot.getPos(), pos_ref) >= 150){
+    robot.changeRef(pos_ref);
   //Serial.print("Vg = "); Serial.print(motorLeft.getSpeed()); Serial.print("; Vd = "); Serial.println(motorRight.getSpeed());
   //Serial.print("v = "); Serial.print(robot.getV()); Serial.print("; w = "); Serial.print(robot.getW()); Serial.print("; theta = "); Serial.println(robot.getTheta());
-
   } else {
     motorLeft.setVoltage(0); motorRight.setVoltage(0);
     motorLeft.applyVoltage(); motorRight.applyVoltage();

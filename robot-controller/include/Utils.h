@@ -18,12 +18,6 @@ const double PULSE_PER_TURN = 8.;
 const int FORWARD = 1;
 const int BACKWARD = -1;
 
-// Function to convert a value to PWM
-int convertToPWM(const int value);
-
-// Return the absolute value of a number
-float myAbs(const float value);
-
 // Structure to represent a point
 struct Point {
     float x;
@@ -31,3 +25,11 @@ struct Point {
 
     Point(float x = 0, float y = 0) : x(x), y(y) {}
 };
+
+// Function to convert a value to PWM
+int convertToPWM(const int value);
+
+// Return the absolute value of a number
+float myAbs(const float value);
+
+float distance(const Point pos1, const Point pos2);

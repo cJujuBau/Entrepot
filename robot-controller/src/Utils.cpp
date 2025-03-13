@@ -14,3 +14,7 @@ int convertToPWM(const int value) {
 float myAbs(const float value){
     return (value >= 0) ? value : -value;
 }
+
+float distance(const Point pos1, const Point pos2){
+    return sqrt(pow(pos1.x - pos2.x, 2) + pow(pos1.y - pos2.y,2));
+}

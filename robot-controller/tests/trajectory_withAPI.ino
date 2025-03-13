@@ -5,10 +5,9 @@
 #include "include/Robot.h"
 #include "include/InverseMotorModel.h"
 #include "include/Motor.h"
+#include "include/Trajectory.h"
 #include "include/Utils.h"
 
-const double SPEED = 150.0; // mm.s-1
-const double ROT_SPEED = PI/4.; // rad.s-1
 const int MAX_CHIFFRE_POS = 10;
 
 const double Km = 1./50.;
@@ -22,10 +21,19 @@ const Point pos_ref = Point(1000, -1500);
 
 MeGyro gyro;
 
-const double theta_init =  PI;
+const double theta_init = 0;
 
 int xMM, yMM;
-float xRef, yRef, oRef;
+float xRef = -1., yRef = -1., oRef = 0.;
+
+float ti;
+float tf = 10000;
+float tf2 = 20000;
+float tf3 = 30000;
+float qi[4]={0.}, qf[4]={0.};
+
+float x_traj, y_traj;
+Point pos_traj;
 
 Motor motorLeft(37, 36, 8, 19, 38, BACKWARD);
 Motor motorRight(34, 35, 12, 18, 31, FORWARD);
@@ -37,6 +45,7 @@ InverseMotorModel inverseMotorModel(Kx, Ky);
 
 Robot robot(pos_init, motorLeft, motorRight, motorControllerLeft, motorControllerRight, inverseMotorModel, theta_init);
 
+Trajectory trajectory;
 
 void getPosMM(){
   char strPos[MAX_CHIFFRE_POS+1] = {0};
@@ -66,7 +75,9 @@ void getPosMM(){
     else strPos[index++] = recu;
     
   }
-  Serial.print("xMM=");
+  Serial.print("t=");
+  Serial.print(millis());
+  Serial.print(", xMM=");
   Serial.print(xMM);
   Serial.print(", yMM=");
   Serial.println(yMM);
@@ -107,6 +118,17 @@ void getPosRef() {
       strPos[index++] = recu; // Stocker le caractère
     }
   }
+
+  Serial.print("xRef=");
+  Serial.print(xRef);
+  Serial.print(", yRef=");
+  Serial.print(yRef);
+  Serial.print(", oRef=");
+  Serial.println(oRef);
+
+  qi[0] = robot.getPos().x; qi[1] = robot.getPos().y; qi[2] = robot.getTheta(); qi[3] = millis();
+  qf[0] = xRef; qf[1] = yRef; qf[2] = oRef; qf[3] = tf + millis();
+  trajectory.computeParameters(qi, qf);
 }
 
 void readMM(){
@@ -140,16 +162,10 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(motorLeft.getVA()), onRisingEdge_MG, RISING);
   attachInterrupt(digitalPinToInterrupt(motorRight.getVA()), onRisingEdge_MD, RISING);
 
-  //while (robot.getPos().x == 0 and robot.getPos().y == 0){
-  //  readMM();
-  //}
+  while ((robot.getPos().x == 0 and robot.getPos().y == 0) or (xRef < 0 and yRef < 0)){
+    readMM();
+  }
 }
-
-static int forwardOnce = 0;
-static int leftOnce = 0;
-static int rightOnce = 0;
-static int backwardOnce = 0;
-static int stopOnce = 0;
 
 void loop() {
   static long timePrec = 0;
@@ -161,23 +177,22 @@ void loop() {
   unsigned long currentTime = millis();
   unsigned long elapsedTime = currentTime - startTime;
 
-  //readMM();
+  readMM();
+  
   gyro.update();
   robot.readGyro(theta_init + (gyro.getAngleZ() * PI / 180.));
+  //Serial.print("t = "); Serial.print(millis()); Serial.print("; ");
+  robot.updateState(); // A modifier: lorsqu'on mesure sur le gyro ou avec MM, il ne faudrait pas mettre à jour l'odométrie
+  // Sinon c'est comme si on mettait 2 fois à jour l'état du robot
   
-  robot.updateState();
-  if (elapsedTime <= 15000){
-        if (elapsedTime <= 15000) {
-      (forwardOnce++ > 0) ? : Serial.println("Forward");
-      robot.changeRef(pos_ref);
-  
-    } else if (elapsedTime <= 15000) {
-      (stopOnce++ > 0) ? : Serial.println("Stop");
-      robot.changeRef(pos_init);
-    }
+
+  if (distance(robot.getPos(), pos_ref) >= 100){
+    pos_traj = trajectory.computeTraj(robot.getPos().x, millis());
+    robot.changeRef(pos_traj);
+  //Serial.print("ti = "); Serial.print(ti); Serial.print("; tf = "); Serial.print(tf); Serial.print("; t = "); Serial.println(millis());
   //Serial.print("Vg = "); Serial.print(motorLeft.getSpeed()); Serial.print("; Vd = "); Serial.println(motorRight.getSpeed());
   //Serial.print("v = "); Serial.print(robot.getV()); Serial.print("; w = "); Serial.print(robot.getW()); Serial.print("; theta = "); Serial.println(robot.getTheta());
-
+   //Serial.print("x_traj = "); Serial.print(pos_traj.x); Serial.print("; y_traj = "); Serial.println(pos_traj.y);
   } else {
     motorLeft.setVoltage(0); motorRight.setVoltage(0);
     motorLeft.applyVoltage(); motorRight.applyVoltage();
