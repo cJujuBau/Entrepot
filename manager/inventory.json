@@ -1,0 +1,114 @@
+[
+    {
+        "id": 1,
+        "name": "Hammer",
+        "quantity": 2,
+        "rack": 4,
+        "row": 1
+    },
+    {
+        "id": 2,
+        "name": "Screwdriver",
+        "quantity": 2,
+        "rack": 1,
+        "row": 2
+    },
+    {
+        "id": 3,
+        "name": "Wrench",
+        "quantity": 12,
+        "rack": 2,
+        "row": 3
+    },
+    {
+        "id": 4,
+        "name": "Drill",
+        "quantity": 11,
+        "rack": 3,
+        "row": 4
+    },
+    {
+        "id": 5,
+        "name": "Angle Grinder",
+        "quantity": 3,
+        "rack": 4,
+        "row": 2
+    },
+    {
+        "id": 6,
+        "name": "Impact Driver",
+        "quantity": 1,
+        "rack": 1,
+        "row": 3
+    },
+    {
+        "id": 7,
+        "name": "Battery 18V",
+        "quantity": 17,
+        "rack": 2,
+        "row": 4
+    },
+    {
+        "id": 8,
+        "name": "Charger",
+        "quantity": 16,
+        "rack": 3,
+        "row": 1
+    },
+    {
+        "id": 9,
+        "name": "Multitool",
+        "quantity": 3,
+        "rack": 4,
+        "row": 4
+    },
+    {
+        "id": 10,
+        "name": "Table Saw",
+        "quantity": 4,
+        "rack": 1,
+        "row": 1
+    },
+    {
+        "id": 11,
+        "name": "Plunge Saw",
+        "quantity": 3,
+        "rack": 2,
+        "row": 2
+    },
+    {
+        "id": 12,
+        "name": "Circular Saw",
+        "quantity": 7,
+        "rack": 3,
+        "row": 3
+    },
+    {
+        "id": 13,
+        "name": "Routers",
+        "quantity": 11,
+        "rack": 4,
+        "row": 3
+    },
+    {
+        "id": 14,
+        "name": "Heatgun",
+        "quantity": 6,
+        "rack": 1,
+        "row": 4
+    },
+    {
+        "id": 15,
+        "name": "Orbit Sander",
+        "quantity": 18,
+        "rack": 2,
+        "row": 1
+    },
+    {
+        "id": 16,
+        "name": "Jigsaw",
+        "quantity": 10,
+        "rack": 3,
+        "row": 2
+    }
+]
