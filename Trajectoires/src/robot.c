@@ -9,6 +9,7 @@
 #include <SFML/Graphics.h>
 #include <SFML/Graphics.h>
 #include <pthread.h>
+#include <unistd.h>
 
 robot* rbt = NULL; // Définition de la variable externe
 robot* rbt2 = NULL;
@@ -67,7 +68,7 @@ int Deplacement_elementaire(robot* rbt, sfVector2f posfinale)
 {
     sfVector2f posRobot = *(rbt->pos);
     float d = distance(posRobot,posfinale);
-    if(d > 5)
+    if(d > 8) // 5
     {
         sfVector2f nouvellePosition = {(rbt->pos)->x + VITESSE_ROBOT * ((posfinale.x - posRobot.x)/d), (rbt->pos)->y + VITESSE_ROBOT * ((posfinale.y - posRobot.y)/d)}; 
         if(compteur  % 100 == 0)
@@ -139,7 +140,7 @@ int deplacementSection(robot* rbt, int numero_section_objectif)
     return 1;
 }
 
-int chercheObjet(robot* rbt, ItemPath objet)
+int chercheObjet(robot* rbt, ItemPath* objet)
 {
     // le robot n'est pas encore dans l'allee
     if(!rbt->isInAisle)
@@ -160,27 +161,27 @@ int chercheObjet(robot* rbt, ItemPath objet)
         else
         {
             //printf("Le robot %d n'a pas encore pris d'allée \n", id_robot);
-            if(objet.aisleR != -1)
+            if(objet->aisleR != -1)
             {
-                if(pthread_mutex_trylock(&allee_etageres[objet.aisleR - 1]->mutex) == 0)
+                if(pthread_mutex_trylock(&allee_etageres[objet->aisleR - 1]->mutex) == 0)
                 {
                     //si l'allee droite est dispo : on prend l'allee droite
-                    printf("Le robot %d va se rendre dans l'allée %d \n", rbt->id_robot, objet.aisleR);
-                    rbt->prochaineAllee = objet.aisleR;
-                    rbt->cheminAllee[0] = objet.waypointsR[0];
-                    rbt->cheminAllee[1] = objet.waypointsR[1];
+                    printf("Le robot %d va se rendre dans l'allée %d \n", rbt->id_robot, objet->aisleR);
+                    rbt->prochaineAllee = objet->aisleR;
+                    rbt->cheminAllee[0] = objet->waypointsR[0];
+                    rbt->cheminAllee[1] = objet->waypointsR[1];
                     return 1;
                 }
             }
-            if(objet.aisleL != -1)
+            if(objet->aisleL != -1)
             {
-                if(pthread_mutex_trylock(&allee_etageres[objet.aisleL - 1]->mutex) == 0)
+                if(pthread_mutex_trylock(&allee_etageres[objet->aisleL - 1]->mutex) == 0)
                 {
                     // si l'allée gauche est dispo : on prend l'allee gauche
-                    printf("Le robot %d va se rendre dans l'allée %d \n", rbt->id_robot, objet.aisleL);
-                    rbt->prochaineAllee = objet.aisleL;
-                    rbt->cheminAllee[0] = objet.waypointsL[0];
-                    rbt->cheminAllee[1] = objet.waypointsL[1];
+                    printf("Le robot %d va se rendre dans l'allée %d \n", rbt->id_robot, objet->aisleL);
+                    rbt->prochaineAllee = objet->aisleL;
+                    rbt->cheminAllee[0] = objet->waypointsL[0];
+                    rbt->cheminAllee[1] = objet->waypointsL[1];
                     return 1;
                 }
             }
@@ -210,6 +211,7 @@ int chercheObjet(robot* rbt, ItemPath objet)
             if(Deplacement_elementaire(rbt, rbt->cheminAllee[1]) == 0)
             {
                 rbt->numero_wayPoint = 2;
+                sleep(2);
                 return 0;
             }
         }
@@ -303,6 +305,7 @@ int deposeBac(robot* rbt, int bac)
                 pthread_mutex_unlock(&s_principale[entreeAllee]->mutex);
                 rbt->hasMutex = 0;
                 rbt->numero_wayPoint = 1;
+                sleep(2);
             }
         }
         else if(rbt->numero_wayPoint == 1)

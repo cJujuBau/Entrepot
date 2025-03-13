@@ -39,7 +39,7 @@ void actualiseSectionWayPointRobot(robot* rbt, int n_section, int n_wayPoint);
 int Deplacement_elementaire(robot* rbt, sfVector2f posfinale);
 int deplacementSection(robot* rbt, int numero_section_objectif);
 void testAvancer();
-int chercheObjet(robot* rbt, ItemPath objet);
+int chercheObjet(robot* rbt, ItemPath* objet);
 int retourCyclePrincipal(robot* rbt);
 int deposeBac(robot* rbt, int bac);
 
