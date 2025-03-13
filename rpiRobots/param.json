@@ -3,5 +3,5 @@
     "portMarvelmind": "/dev/ttyACM0",
     "addressMM": 12,
     "id": 1,
-    "ipServer": "72.20.10.7"
+    "ipServer": "172.20.10.3"
 }

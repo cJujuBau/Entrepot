@@ -113,10 +113,10 @@ void getPositionMarvelmind(RobotMarvelmind robotMarvelmind, Position position){
             if (hedge->haveNewValues_){
                 // Same as printPositionFromMarvelmindHedge in marvelmind.c file
                 getPositionFromMarvelmindHedgeByAddress(hedge, &positionMM, robotMarvelmind->address);
-        
+                
                 if (positionMM.ready==true && positionMM.x < MAX_COORD && positionMM.x > MIN_COORD){
 
-
+                    
                     // position->x= 2000 - positionMM.x;
                     // position->y= 1300 - positionMM.y;
 
@@ -158,13 +158,33 @@ int encodePosition(char buffer[20], const Position position){
 // Thread function to get and send position to the server and serial port
 void *threadGetAndSendPositionMarvelmind(void *arg){
     Position position = malloc(sizeof(struct Position));
+    Position newPosition = malloc(sizeof(struct Position));
     Position positionSever = malloc(sizeof(struct Position));
     int size = -1;
     char buffer[20];
+    struct timespec ts, newTs;
+
+    CHECK(clock_gettime(0, &ts), "threadGetAndSendPositionMarvelmind: clock_gettime(ts) failed");
 
     while (getPositionON)
     {           
-        getPositionMarvelmind(robotMarvelmind, position);
+        // sleep(1);
+        //usleep(500000); // 500ms -> Force 2Hz frequency // MM 14 has new values every 1ms but it doesn't change and server crashes
+        getPositionMarvelmind(robotMarvelmind, newPosition);
+        CHECK(clock_gettime(0, &newTs), "threadGetAndSendPositionMarvelmind: clock_gettime(newTs) failed");
+        // Force to only change position if it is different
+        if (newPosition->x == position->x && newPosition->y == position->y && (newTs.tv_sec - ts.tv_sec) < 1){
+            continue;
+        }
+
+        // Update position
+        position->x = newPosition->x;
+        position->y = newPosition->y;
+
+        // Update time
+        ts.tv_sec = newTs.tv_sec;
+        ts.tv_nsec = newTs.tv_nsec;
+
         DEBUG_PRINT("threadGetAndSendPositionMarvelmind: x=%d, y=%d\n", position->x, position->y);
 
         size = encodePosition(buffer, position);
@@ -189,6 +209,7 @@ void *threadGetAndSendPositionMarvelmind(void *arg){
             perror("threadGetAndSendPositionMarvelmind: sendToServer failed");
             getPositionON = 0;
         }
+        
     }
 
     DEBUG_PRINT("threadGetAndSendPositionMarvelmind: End of thread\n");

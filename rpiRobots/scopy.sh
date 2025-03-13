@@ -6,7 +6,7 @@ LOCAL_INCLUDE_DIR="./include"
 LOCAL_MAKEFILE="./makefile"
 LOCAL_PARAM_FILE="./param.json"
 REMOTE_USER="pi"
-REMOTE_HOST="172.20.10.4"
+REMOTE_HOST="172.20.10.4" # ip rasp : 10.6 et 10.4
 # REMOTE_HOST="192.168.1.24"  # Remplacez par l'adresse IP de votre Raspberry Pi
 REMOTE_DIR="/home/pi/entrepot"
 
