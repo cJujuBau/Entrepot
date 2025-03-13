@@ -1,0 +1,7 @@
+{
+    "portArduino": "/dev/ttyS0",
+    "portMarvelmind": "/dev/ttyACM0",
+    "addressMM": 12,
+    "id": 1,
+    "ipServer": "172.20.10.3"
+}
